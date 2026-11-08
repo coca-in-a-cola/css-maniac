@@ -66,7 +66,8 @@ const rules = (withColors) => ({
   'selector-class-pattern': null, // BEM: '^[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?:__[a-z0-9]+(?:-[a-z0-9]+)*)?(?:--[a-z0-9]+(?:-[a-z0-9]+)*)?$'
   'custom-property-pattern': '^_?[a-z][a-z0-9]*(?:-[a-z0-9]+)*$', // --public, --_private
   'media-feature-range-notation': 'prefix', // classic min-width
-  'hue-degree-notation': 'number', // OKLCH channel math works on plain numbers
+  'hue-degree-notation': 'number', // oklch(0.5 0.2 277): plain-number hue
+  'lightness-notation': 'number', // L as 0–1, like `l` inside oklch(from …) math
 });
 
 export default {

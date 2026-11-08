@@ -66,13 +66,18 @@ Every time you write or change styles:
   - `display: block` on a `div`, `width: 100%` on a block, `box-sizing` per element, vendor prefixes, `position: relative` nobody needs, `z-index` with no stacking need, duplicates, `!important`.
   - Fixed `height` on text containers → remove it or use `min-block-size`.
 
+# Variables
+
+- As few as possible. A variable exists only when something reads it twice, a person or a script will change it, or it is derived.
+- One variable holds the fullest shorthand: one whole color, never its `l`/`c`/`h` channels; one `padding`, `border`, `box-shadow`, `font`, `transition`, never their sides or parts. A theme or a script switch changes one variable.
+
 # Components
 
 - Mini-component: one class with a public custom-property API, e.g. `.app-button`.
-- Public vars: `--button-bg` without a CSS framework, `--app-button-bg` with one.
+- Public vars: `--button-bg` without a CSS framework, `--app-button-bg` with one. Nobody sets them by default.
 - Private vars (`--_button-bg`) only where a value is read twice or derived. Always unique names, never a bare `--_bg`.
-- Multi-fallback: `--_button-bg: var(--button-bg, var(--color-primary));`.
-- Derived states are their own private vars, computed from the base. Change one var → the whole component recolors.
+- Multi-fallback: `--_button-bg: var(--button-bg, var(--color-brand));`.
+- A derived value reads its unset public var first, then computes: `--_button-bg-hover: var(--button-bg-hover, color-mix(in oklch, var(--_button-bg), var(--_button-fg) 8%));`. Change one var → every state follows; override one state → it alone changes.
 - Modifiers set public vars only.
 - Inheriting public values is a feature. Prevent collisions with unique names, not by blocking inheritance.
 - Set a public var on the instance that uses it (or its modifier), never on a wrapper: nested instances of the same component inherit it too.
@@ -121,17 +126,18 @@ Every time you write or change styles:
 
 # Color
 
-- Inputs: the primary color as OKLCH channels `--primary-l`, `--primary-c`, `--primary-h`, and `--is-dark` (0 or 1). Everything else is derived and can be reassigned. Reference: `references/palette.css`.
-- Light and dark themes always exist. The user never writes the second palette.
+- Base colors: the few colors the design is built on, as many as the design needs. Each is one variable holding one whole color.
+- Every color that can be computed from a base color is computed in OKLCH: `color-mix(in oklch, …)`, or `oklch(from …)` / `color(from …)` inside `@supports (color: oklch(from red l c h))` with a fallback.
+- Theme colors are plain variables in the root palette, each reassignable. Component colors follow the derived-value rule in Components.
+- Light and dark themes always exist, switched by one `--is-dark` (0 or 1). The user never writes the second palette.
 - Components never contain a literal color. Only `var()`, `color-mix()` of vars, `currentColor`, `transparent`.
 - Given a hex → convert it to OKLCH once, keep the hex in a comment.
 - Theme switch: `.is-dark` / `.is-light` or `prefers-color-scheme`. Re-declare the derived vars on every selector that sets `--is-dark`: custom properties compute where they are declared.
-- Derive with math, not by eye:
-  - Neutrals: primary hue, low chroma, fixed lightness per theme.
-  - State layers (Material 3): hover 8%, focus 10%, pressed 10% of the on-color mixed into the container: `color-mix(in oklch, var(--_x-bg), var(--_x-fg) 8%)`.
-  - Text on an arbitrary fill: white below OKLCH L 0.623, black above (Lea Verou's WCAG-safe threshold; 0.70 favours readability over compliance).
-  - Contrast in tone steps (Material HCT, tone ≈ L*): Δ40 ≈ 3:1, Δ50 ≈ 4.5:1, Δ70 ≈ 7:1. OKLCH L is close to L*, not equal: verify.
-- Relative color `oklch(from …)` only inside `@supports (color: oklch(from red l c h))` with a fallback, until it is widely available. The channel inputs make it unnecessary for the palette.
+- Derive with math, not by eye. Reference: `references/palette.css`.
+  - Neutrals: paper and ink (`oklch(L 0 none)`) tinted by a base through `color-mix(in oklch, …)`. Mixing is linear in L, so their contrast holds for any base.
+  - A base used as text or fill: L clamped ≤ 0.48 light, ≥ 0.75 dark, chroma shrinking with it (Material tone 40 / 80).
+  - State layers (Material 3): hover 8%, focus 10%, pressed 10% of the on-color mixed into the container.
+  - Text on a fill: black or white by WCAG luminance, never by OKLCH L. No L threshold is safe; the luminance flip at Y 0.179 guarantees ≥ 4.58:1 on any sRGB fill.
 
 # Specificity and Stacking
 

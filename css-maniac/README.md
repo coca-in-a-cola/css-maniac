@@ -10,7 +10,7 @@ An agent skill that makes AI write and fix CSS/SCSS like someone who has hand-wr
 - **Mini-components** with public custom-property APIs and unique private vars.
 - **Flex first**, then Kevin Powell's Stack / Prose / Pile; grid only where flex can't; absolute as a last resort.
 - **One grid unit**, rem-scaled UI, one mobile-first breakpoint set.
-- **Derived OKLCH palette**: one primary color + a dark flag; light and dark themes, states and contrast all computed.
+- **Derived OKLCH palette**: a few base colors (one variable each) + a dark flag; light and dark themes, states and contrast all computed.
 
 ## Before done
 
@@ -18,7 +18,7 @@ An agent skill that makes AI write and fix CSS/SCSS like someone who has hand-wr
 - **Pin**: a refactor or removal changes nothing it shouldn't, at every breakpoint and in both themes.
 - **Contrast**: every touched text meets WCAG 2 AA, light and dark.
 
-The palette was verified against 8,192 hex inputs in both themes: every text and fill pair, hover and pressed states included, is ≥ 4.99:1.
+The palette was verified against 8,192 hex inputs in both themes: every text and fill pair, hover and pressed states included, is ≥ 4.58:1 (the guaranteed maximum for black or white text).
 
 ## Install
 

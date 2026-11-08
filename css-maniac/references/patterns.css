@@ -80,15 +80,17 @@ body {
 }
 
 /*
-  Mini-component. Public API: --button-bg, --button-fg.
-  States derive from the private base: change one var, the whole button follows.
+  Mini-component. Public API: --button-bg, --button-fg, --button-bg-hover, --button-bg-active.
+  Nobody sets them by default: each private var reads its public one first,
+  then falls back to a value computed in OKLCH from the base.
+  Change --button-bg alone and every state follows.
   State layers = Material 3: hover 8%, pressed 10% of the on-color.
 */
 .app-button {
-  --_button-bg: var(--button-bg, var(--color-primary));
-  --_button-fg: var(--button-fg, var(--color-on-primary));
-  --_button-bg-hover: color-mix(in oklch, var(--_button-bg), var(--_button-fg) 8%);
-  --_button-bg-active: color-mix(in oklch, var(--_button-bg), var(--_button-fg) 10%);
+  --_button-bg: var(--button-bg, var(--color-brand));
+  --_button-fg: var(--button-fg, var(--color-on-brand));
+  --_button-bg-hover: var(--button-bg-hover, color-mix(in oklch, var(--_button-bg), var(--_button-fg) 8%));
+  --_button-bg-active: var(--button-bg-active, color-mix(in oklch, var(--_button-bg), var(--_button-fg) 10%));
 
   display: inline-flex;
   align-items: center;
@@ -112,7 +114,7 @@ body {
   }
 
   &:focus-visible {
-    outline: 0.125rem solid var(--color-primary);
+    outline: 0.125rem solid var(--color-brand);
     outline-offset: 0.125rem;
   }
 }
@@ -120,7 +122,7 @@ body {
 /* Modifiers set public vars only. */
 .app-button--ghost {
   --button-bg: transparent;
-  --button-fg: var(--color-primary);
+  --button-fg: var(--color-brand);
 }
 
 /* Allowed absolute #1: the whole card is clickable through its one link. */
