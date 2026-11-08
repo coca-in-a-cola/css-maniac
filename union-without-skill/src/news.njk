@@ -1,0 +1,34 @@
+---
+layout: base.njk
+permalink: news.html
+navKey: news
+title: "Новости"
+description: "Новости профсоюза «Сцепка»: переговоры, решения Президиума, охрана труда, правовая помощь."
+---
+{% from "macros.njk" import img, newsMeta %}
+
+<header class="page-head">
+  <div class="wrap">
+    <h1 class="page-head__title">Новости</h1>
+    <p class="page-head__lead">Переговоры, решения органов профсоюза, проверки и разборы юристов.</p>
+  </div>
+</header>
+
+<div class="wrap section section--flush">
+  <ol class="news-list">
+    {% for n in news %}
+    <li class="news-item{% if loop.first %} news-item--lead{% endif %}">
+      <article class="news-item__inner">
+        <a class="news-item__media" href="news/{{ n.slug }}.html" tabindex="-1" aria-hidden="true">
+          {{ img(photos[n.photo], "(min-width: 48em) 22rem, 100vw" if not loop.first else "(min-width: 60em) 40rem, 100vw", "news-item__img", false, 800 if not loop.first else 1200) }}
+        </a>
+        <div class="news-item__body">
+          {{ newsMeta(n) }}
+          <h2 class="news-item__title"><a href="news/{{ n.slug }}.html">{{ n.title }}</a></h2>
+          <p class="news-item__lead">{{ n.lead }}</p>
+        </div>
+      </article>
+    </li>
+    {% endfor %}
+  </ol>
+</div>

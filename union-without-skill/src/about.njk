@@ -1,0 +1,86 @@
+---
+layout: base.njk
+permalink: about.html
+navKey: about
+title: "О профсоюзе и контакты"
+description: "История, структура и контакты профсоюза «Сцепка». Как вступить в профсоюз."
+---
+{% from "macros.njk" import img %}
+
+<header class="page-head">
+  <div class="wrap">
+    <h1 class="page-head__title">О профсоюзе</h1>
+    <p class="page-head__lead">«Сцепка» объединяет работников машиностроения, металлургии, железнодорожного и промышленного транспорта, строительства и ведомственной медицины. Профсоюз независим от работодателей и политических партий и существует на членские взносы.</p>
+    <nav aria-label="На этой странице">
+      <ul class="page-head__jump">
+        <li><a href="#join">Как вступить</a></li>
+        <li><a href="#contacts">Контакты</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap about">
+  <section class="about__intro">
+    <div class="prose">
+      <h2>Кто мы</h2>
+      <p>Профсоюз создан в 2009 году первичными организациями трёх заводов Нижегородской области, которые решили вести переговоры с работодателями вместе. Название — от железнодорожного термина: сцепка соединяет вагоны в один состав, и только так он может двигаться.</p>
+      <p>Сегодня в профсоюзе 63 первичные организации в 11 регионах. Высший орган — Съезд, который собирается раз в пять лет. Между съездами работу ведут Совет и Президиум, за финансами следит независимая ревизионная комиссия.</p>
+      <h2>Руководство</h2>
+      <dl class="people">
+        <div><dt>Председатель профсоюза</dt><dd>Андрей Викторович Ладыгин</dd></div>
+        <div><dt>Заместитель председателя, правовой инспектор</dt><dd>Наталья Олеговна Брусницына</dd></div>
+        <div><dt>Технический инспектор труда</dt><dd>Рустам Ильдарович Габдуллин</dd></div>
+        <div><dt>Председатель ревизионной комиссии</dt><dd>Елена Павловна Сомова</dd></div>
+      </dl>
+    </div>
+    <figure class="about__figure">
+      {{ img(photos.machineHall, "(min-width: 60em) 28rem, 100vw", "about__img", false, 1200) }}
+      <figcaption class="photo-credit">Фото: {{ photos.machineHall.credit }}</figcaption>
+    </figure>
+  </section>
+
+  <section class="timeline-block" aria-labelledby="history">
+    <h2 class="section-head__title" id="history">Вехи</h2>
+    <ol class="timeline">
+      <li><span class="timeline__year">2009</span> Учредительный съезд: 3 первичные организации, 2 100 членов.</li>
+      <li><span class="timeline__year">2014</span> Первое региональное отраслевое соглашение в машиностроении.</li>
+      <li><span class="timeline__year">2019</span> Открыта юридическая приёмная и бесплатная горячая линия.</li>
+      <li><span class="timeline__year">2023</span> В профсоюз вступили работники строительства и ведомственных больниц.</li>
+      <li><span class="timeline__year">2025</span> V съезд принял новую редакцию Устава.</li>
+    </ol>
+  </section>
+
+  <section class="join" id="join" aria-labelledby="join-title">
+    <h2 class="section-head__title" id="join-title">Как вступить</h2>
+    <ol class="steps">
+      <li class="step"><h3 class="step__title">Напишите заявление</h3><p>Бланк есть у председателя профкома на вашем предприятии. Если первичной организации нет, напишите нам — поможем её создать.</p></li>
+      <li class="step"><h3 class="step__title">Оформите удержание взносов</h3><p>Взнос — 1 % заработной платы. Он удерживается бухгалтерией по вашему письменному заявлению.</p></li>
+      <li class="step"><h3 class="step__title">Получите профбилет</h3><p>С первого дня вам доступны консультации юристов, с шестого месяца — выплаты из фонда солидарности.</p></li>
+    </ol>
+  </section>
+
+  <section class="contacts" id="contacts" aria-labelledby="contacts-title">
+    <h2 class="section-head__title" id="contacts-title">Контакты</h2>
+    <div class="contacts__grid">
+      <div class="contact-card">
+        <h3 class="contact-card__title">Аппарат профсоюза</h3>
+        <p>{{ site.address }}</p>
+        <p><a href="tel:{{ site.phoneHref }}">{{ site.phone }}</a><br><a href="mailto:{{ site.email }}">{{ site.email }}</a></p>
+        <p class="contact-card__muted">{{ site.hours }}</p>
+      </div>
+      <div class="contact-card">
+        <h3 class="contact-card__title">Горячая линия и юристы</h3>
+        <p class="contact-card__big"><a href="tel:{{ site.hotlineHref }}">{{ site.hotline }}</a></p>
+        <p><a href="mailto:{{ site.emailLegal }}">{{ site.emailLegal }}</a></p>
+        <p class="contact-card__muted">{{ site.legalHours }}</p>
+      </div>
+      <div class="contact-card">
+        <h3 class="contact-card__title">Для прессы</h3>
+        <p>Пресс-секретарь — Мария Юрьевна Остапенко</p>
+        <p><a href="mailto:press@scepka-union.example">press@scepka-union.example</a></p>
+        <p class="contact-card__muted">Отвечаем на запросы в течение рабочего дня.</p>
+      </div>
+    </div>
+  </section>
+</div>

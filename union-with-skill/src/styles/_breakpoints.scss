@@ -1,0 +1,23 @@
+@use "sass:map";
+
+// One set for the whole app. Mobile-first, min-width, px boundaries
+// (other units adapt, boundaries must not). Fill the values per project.
+// Styles outside any mixin are the base: the smallest phones.
+$breakpoints: (
+  xs: 360px,
+  sm: 576px,
+  md: 768px,
+  lg: 1024px,
+  xl: 1440px,
+);
+
+// @include size(md) { … }
+@mixin size($name) {
+  @if not map.has-key($breakpoints, $name) {
+    @error "Unknown breakpoint `#{$name}`. Use one of: #{map.keys($breakpoints)}.";
+  }
+
+  @media (min-width: map.get($breakpoints, $name)) {
+    @content;
+  }
+}

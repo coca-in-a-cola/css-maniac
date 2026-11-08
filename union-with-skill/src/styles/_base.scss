@@ -1,0 +1,126 @@
+@use "breakpoints" as *;
+
+/* Minimal reset. Stack, Prose and Pile assume margins start at 0. */
+*,
+::before,
+::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-inline-size: 100%;
+}
+
+/* width/height attributes give the ratio before load; CSS keeps the image fluid. */
+img {
+  block-size: auto;
+}
+
+/* Form fields inherit the root size, so they stay ≥ 16px and iOS won't zoom. */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Root scale. All UI is in rem. Phones get a bigger UI on purpose; the jump at 768px is intended. */
+html {
+  font-size: clamp(100%, 62.5% + 2.5vw, 137.5%);
+
+  @include size(md) {
+    font-size: 100%;
+  }
+}
+
+:root {
+  --font-text: "Onest Variable", system-ui, sans-serif;
+  --font-display: "Unbounded Variable", "Onest Variable", system-ui, sans-serif;
+}
+
+body {
+  font: 400 1rem/1.6 var(--font-text);
+  color: var(--color-fg);
+  background: var(--color-bg);
+}
+
+h1,
+h2,
+h3 {
+  overflow-wrap: break-word;
+}
+
+/* Newly available: plain wrapping is the fallback. */
+@supports (text-wrap: balance) {
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+@media (hover: hover) {
+  a:hover {
+    text-decoration-thickness: 0.125em;
+  }
+}
+
+:focus-visible {
+  outline: 0.125rem solid var(--color-primary);
+  outline-offset: 0.125rem;
+}
+
+/* Primitives (Kevin Powell). */
+.stack {
+  display: flex;
+  flex-flow: column;
+  gap: var(--stack-gap, 1rem);
+}
+
+.prose {
+  max-inline-size: 65ch;
+}
+
+.prose > * + * {
+  margin-block-start: var(--prose-flow, 1em);
+}
+
+.pile {
+  display: grid;
+  place-items: center;
+}
+
+.pile > * {
+  grid-area: 1 / 1;
+}
+
+/* Hidden visually, kept for screen readers. The skip link shows itself on focus. */
+.visually-hidden,
+.skip-link:not(:focus) {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+}

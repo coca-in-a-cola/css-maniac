@@ -1,0 +1,1009 @@
+@charset "UTF-8";
+/*
+  CSS Maniac palette (references/palette.css), unchanged except the brand input.
+  Inputs: the primary color as OKLCH channels + --is-dark (0 | 1).
+  Everything else is derived; contrast is guaranteed by the lightness bounds.
+*/
+:root {
+  /* brand #ba2f12, brick red */
+  --primary-l: 0.52;
+  --primary-c: 0.18;
+  --primary-h: 33;
+  --is-dark: 0;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.is-light) {
+    --is-dark: 1;
+    color-scheme: dark;
+  }
+}
+.is-dark {
+  --is-dark: 1;
+  color-scheme: dark;
+}
+
+.is-light {
+  --is-dark: 0;
+  color-scheme: light;
+}
+
+/* Re-declared on every theme scope: custom properties compute where declared. */
+:root,
+.is-dark,
+.is-light {
+  --_palette-tint: calc(var(--primary-c) * 0.08);
+  --_palette-primary-l: calc((1 - var(--is-dark)) * min(var(--primary-l), 0.48) + var(--is-dark) * max(var(--primary-l), 0.75));
+  /* Darkening keeps the color in sRGB only if chroma shrinks with it. */
+  --_palette-primary-c: calc(var(--primary-c) * min(1, var(--_palette-primary-l) / var(--primary-l)));
+  /* Derived. Reassign any of them directly when the design needs it. */
+  --color-bg: oklch(calc(0.985 - 0.8 * var(--is-dark)) var(--_palette-tint) var(--primary-h));
+  --color-surface: oklch(calc(0.955 - 0.7 * var(--is-dark)) var(--_palette-tint) var(--primary-h));
+  --color-border: oklch(calc(0.88 - 0.54 * var(--is-dark)) var(--_palette-tint) var(--primary-h));
+  --color-fg: oklch(calc(0.2 + 0.74 * var(--is-dark)) var(--_palette-tint) var(--primary-h));
+  --color-fg-muted: oklch(calc(0.5 + 0.22 * var(--is-dark)) var(--_palette-tint) var(--primary-h));
+  --color-primary: oklch(var(--_palette-primary-l) var(--_palette-primary-c) var(--primary-h));
+  --color-on-primary: oklch(clamp(0, (var(--_palette-primary-l) / 0.623 - 1) * -1000, 1) 0 0);
+}
+
+/* Self-hosted variable fonts (@fontsource-variable), Cyrillic + Latin subsets. Paths are relative to assets/style.css. */
+@font-face {
+  font-family: "Onest Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("fonts/onest-cyrillic-wght-normal.woff2") format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Onest Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("fonts/onest-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Unbounded Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 900;
+  src: url("fonts/unbounded-cyrillic-wght-normal.woff2") format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Unbounded Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 900;
+  src: url("fonts/unbounded-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Minimal reset. Stack, Prose and Pile assume margins start at 0. */
+*,
+::before,
+::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-inline-size: 100%;
+}
+
+/* width/height attributes give the ratio before load; CSS keeps the image fluid. */
+img {
+  block-size: auto;
+}
+
+/* Form fields inherit the root size, so they stay ≥ 16px and iOS won't zoom. */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Root scale. All UI is in rem. Phones get a bigger UI on purpose; the jump at 768px is intended. */
+html {
+  font-size: clamp(100%, 62.5% + 2.5vw, 137.5%);
+}
+@media (min-width: 768px) {
+  html {
+    font-size: 100%;
+  }
+}
+
+:root {
+  --font-text: "Onest Variable", system-ui, sans-serif;
+  --font-display: "Unbounded Variable", "Onest Variable", system-ui, sans-serif;
+}
+
+body {
+  font: 400 1rem/1.6 var(--font-text);
+  color: var(--color-fg);
+  background: var(--color-bg);
+}
+
+h1,
+h2,
+h3 {
+  overflow-wrap: break-word;
+}
+
+/* Newly available: plain wrapping is the fallback. */
+@supports (text-wrap: balance) {
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+a {
+  color: var(--color-primary);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+@media (hover: hover) {
+  a:hover {
+    text-decoration-thickness: 0.125em;
+  }
+}
+:focus-visible {
+  outline: 0.125rem solid var(--color-primary);
+  outline-offset: 0.125rem;
+}
+
+/* Primitives (Kevin Powell). */
+.stack {
+  display: flex;
+  flex-flow: column;
+  gap: var(--stack-gap, 1rem);
+}
+
+.prose {
+  max-inline-size: 65ch;
+}
+
+.prose > * + * {
+  margin-block-start: var(--prose-flow, 1em);
+}
+
+.pile {
+  display: grid;
+  place-items: center;
+}
+
+.pile > * {
+  grid-area: 1/1;
+}
+
+/* Hidden visually, kept for screen readers. The skip link shows itself on focus. */
+.visually-hidden,
+.skip-link:not(:focus) {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+}
+
+.wrap {
+  max-inline-size: 76rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+@media (min-width: 768px) {
+  .wrap {
+    padding-inline: 2rem;
+  }
+}
+
+.section {
+  --stack-gap: 2rem;
+  margin-block-start: 4rem;
+}
+@media (min-width: 1024px) {
+  .section {
+    margin-block-start: 6rem;
+  }
+}
+
+.page-head + .section {
+  margin-block-start: 0;
+}
+
+/* Header */
+.site-header {
+  border-block-end: 1px solid var(--color-border);
+}
+
+.site-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+  padding-block: 1rem 0.5rem;
+}
+@media (min-width: 1024px) {
+  .site-header__inner {
+    padding-block: 1.25rem;
+  }
+}
+
+/* Logo. Public API: --logo-mark. */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.logo__mark {
+  flex: none;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  color: var(--logo-mark, var(--color-primary));
+}
+
+.logo__text {
+  font: 700 1.125rem/1.1 var(--font-display);
+}
+
+.logo__sub {
+  display: block;
+  max-inline-size: 13rem;
+  margin-block-start: 0.25rem;
+  font: 400 0.75rem/1.3 var(--font-text);
+  color: var(--color-fg-muted);
+}
+
+.logo--inverse {
+  --logo-mark: currentcolor;
+}
+
+/* Main navigation: always visible, wraps on narrow screens. */
+.nav__list {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.nav__link {
+  display: block;
+  padding-block: 0.5rem;
+  font-weight: 500;
+  color: var(--color-fg);
+  text-decoration: none;
+}
+.nav__link[aria-current=page] {
+  color: var(--color-primary);
+  text-decoration: underline 0.1875rem;
+  text-underline-offset: 0.4em;
+}
+@media (hover: hover) {
+  .nav__link:hover {
+    text-decoration: underline 1px;
+    text-underline-offset: 0.4em;
+  }
+}
+
+/* Page and section headings */
+.page-head {
+  padding-block: 2.5rem 2rem;
+}
+@media (min-width: 1024px) {
+  .page-head {
+    padding-block: 4rem 3rem;
+  }
+}
+
+.page-head__title {
+  font: 600 clamp(1.75rem, 1rem + 2.5vw, 3rem)/1.15 var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.page-head__lead {
+  max-inline-size: 60ch;
+  font-size: 1.125rem;
+}
+
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  padding-block-start: 1rem;
+  border-block-start: 0.25rem solid var(--color-fg);
+}
+
+.section-head__title {
+  font: 600 clamp(1.375rem, 1rem + 1.25vw, 2rem)/1.2 var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+.section-head__link {
+  font-weight: 600;
+}
+
+/* Footer: always the dark theme (.is-dark in the HTML), sawtooth roofline on top. */
+.site-footer {
+  margin-block-start: 5rem;
+  padding-block: 3.75rem 2rem;
+  color: var(--color-fg);
+  background: linear-gradient(var(--color-surface) 0 0) 0 0.75rem/100% 100% no-repeat, linear-gradient(to top left, var(--color-surface) 50%, transparent calc(50% + 1px)) 0 0/1.5rem 0.75rem repeat-x;
+}
+@media (min-width: 1024px) {
+  .site-footer {
+    margin-block-start: 7rem;
+  }
+}
+
+.site-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem 4rem;
+}
+
+.site-footer__about {
+  --stack-gap: 1.25rem;
+  flex: 2 1 20rem;
+}
+
+.site-footer__text {
+  max-inline-size: 40ch;
+  color: var(--color-fg-muted);
+}
+
+.site-footer__list {
+  --stack-gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer__nav {
+  flex: 1 1 10rem;
+}
+
+.site-footer__contacts {
+  --stack-gap: 0.5rem;
+  flex: 1 1 16rem;
+  font-style: normal;
+  overflow-wrap: anywhere;
+}
+
+.site-footer__link {
+  color: var(--color-fg);
+}
+
+.site-footer__note {
+  flex: 1 1 100%;
+  padding-block-start: 1.5rem;
+  border-block-start: 1px solid var(--color-border);
+  font-size: 0.875rem;
+  color: var(--color-fg-muted);
+}
+
+/*
+  Button. Public API: --button-bg, --button-fg, --button-border.
+  States derive from the private base (Material 3 state layers: hover 8%, pressed 10%).
+*/
+.button {
+  --_button-bg: var(--button-bg, var(--color-primary));
+  --_button-fg: var(--button-fg, var(--color-on-primary));
+  --_button-bg-hover: color-mix(in oklch, var(--_button-bg), var(--_button-fg) 8%);
+  --_button-bg-active: color-mix(in oklch, var(--_button-bg), var(--_button-fg) 10%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.75em 1.5em;
+  border: 1px solid var(--button-border, transparent);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--_button-fg);
+  text-decoration: none;
+  background: var(--_button-bg);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+@media (hover: hover) {
+  .button:hover {
+    background: var(--_button-bg-hover);
+  }
+}
+.button:active {
+  background: var(--_button-bg-active);
+}
+
+.button--ghost {
+  --button-bg: transparent;
+  --button-fg: var(--color-primary);
+  --button-border: currentcolor;
+}
+
+.button--inverse {
+  --button-bg: var(--color-on-primary);
+  --button-fg: var(--color-primary);
+}
+
+/*
+  Card: image + text, optionally clickable through its one link.
+  Public API: --card-title-size, --card-img-basis, --card-body-basis.
+  Default bases of 100% stack the card; smaller bases put image and text side by side when they fit.
+*/
+.card {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: start;
+  gap: 1.25rem 2.5rem;
+}
+
+.card__img {
+  flex: 1 1 var(--card-img-basis, 100%);
+  min-inline-size: 0;
+  aspect-ratio: 3/2;
+  object-fit: cover;
+  background: var(--color-surface);
+}
+
+.card__body {
+  --stack-gap: 0.5rem;
+  flex: 1 1 var(--card-body-basis, 100%);
+}
+
+.card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  font-size: 0.875rem;
+  color: var(--color-fg-muted);
+}
+
+.card__tag {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.card__title {
+  font: 600 var(--card-title-size, 1.25rem)/1.3 var(--font-text);
+}
+
+.card__link {
+  color: var(--color-fg);
+  text-decoration: none;
+  /* Allowed absolute: the whole card is clickable through its one link. */
+}
+.card__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+@media (hover: hover) {
+  .card:hover .card__link {
+    text-decoration: underline 0.0625em;
+    text-underline-offset: 0.2em;
+  }
+}
+.card--featured {
+  --card-title-size: clamp(1.5rem, 1rem + 1.25vw, 2.25rem);
+  --card-img-basis: 30rem;
+  --card-body-basis: 20rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: 3rem 2rem;
+}
+
+/* Project status. Public API: --status-dot, --status-fill. Text carries the meaning, the dot repeats it. */
+.status {
+  --_status-dot: var(--status-dot, var(--color-primary));
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-weight: 600;
+  color: var(--color-fg);
+}
+.status::before {
+  content: "";
+  inline-size: 0.75em;
+  block-size: 0.75em;
+  border: 0.125em solid var(--_status-dot);
+  border-radius: 999px;
+  background: var(--status-fill, var(--_status-dot));
+}
+
+.status--done {
+  --status-dot: var(--color-fg-muted);
+}
+
+.status--planned {
+  --status-fill: transparent;
+}
+
+/* Numbered list of short points (home page directions, how-to-join steps). */
+.numbered {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 0;
+  list-style: none;
+  counter-reset: numbered;
+}
+
+.numbered__item {
+  --stack-gap: 0.5rem;
+  flex: 1 1 16rem;
+  counter-increment: numbered;
+}
+.numbered__item::before {
+  content: counter(numbered, decimal-leading-zero);
+  font: 600 2rem/1 var(--font-display);
+  color: var(--color-primary);
+}
+
+.numbered__title {
+  font: 600 1.25rem/1.3 var(--font-text);
+}
+
+/*
+  Document registry. Phones: a wrapping row (number + date, then title, then file).
+  Desktop: one grid, every row a subgrid, so columns line up down the whole list.
+*/
+.doc-list {
+  display: flex;
+  flex-flow: column;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 1024px) {
+  .doc-list {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    column-gap: 2rem;
+  }
+}
+
+.doc {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  padding-block: 1.25rem;
+  border-block-end: 1px solid var(--color-border);
+}
+@media (min-width: 1024px) {
+  .doc {
+    display: grid;
+    grid-column: 1/-1;
+    grid-template-columns: subgrid;
+  }
+}
+
+.doc__number {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.doc__date {
+  color: var(--color-fg-muted);
+}
+
+.doc__main {
+  --stack-gap: 0.25rem;
+  flex: 1 1 100%;
+}
+
+.doc__title {
+  max-inline-size: 60ch;
+  font: 600 1.125rem/1.4 var(--font-text);
+}
+
+.doc__category {
+  font-size: 0.875rem;
+  color: var(--color-fg-muted);
+}
+
+.doc__file {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-fg-muted);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+@media (hover: hover) {
+  .doc__file:hover {
+    background: color-mix(in oklch, var(--color-bg), var(--color-primary) 8%);
+  }
+}
+
+.doc__icon {
+  inline-size: 1.25em;
+  block-size: 1.25em;
+}
+
+.doc__size {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--color-fg-muted);
+  white-space: nowrap;
+}
+
+/* Category filter: radio chips, no JS. :has() hides the rows of other categories. */
+.filter {
+  margin-block-end: 1.5rem;
+  padding: 0;
+  border: 0;
+}
+
+.filter__legend {
+  margin-block-end: 0.75rem;
+  padding: 0;
+  font-weight: 600;
+}
+
+.filter__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter__option {
+  --_option-bg: var(--color-bg);
+  --_option-fg: var(--color-fg);
+  --_option-bg-hover: color-mix(in oklch, var(--_option-bg), var(--_option-fg) 8%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-block-size: 2.75rem;
+  padding: 0.25rem 1rem;
+  border: 1px solid var(--color-fg-muted);
+  font-weight: 500;
+  color: var(--_option-fg);
+  background: var(--_option-bg);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+@media (hover: hover) {
+  .filter__option:hover {
+    background: var(--_option-bg-hover);
+  }
+}
+.filter__option:has(:checked) {
+  --_option-bg: var(--color-fg);
+  --_option-fg: var(--color-bg);
+  border-color: var(--color-fg);
+}
+.filter__option:has(:focus-visible) {
+  outline: 0.125rem solid var(--color-primary);
+  outline-offset: 0.125rem;
+}
+
+.filter__count {
+  font-size: 0.875rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+/* One selector per category id in src/data/documents.json. */
+.registry:has(.filter__input[value=ustav]:checked) .doc:not([data-category=ustav]),
+.registry:has(.filter__input[value=kd]:checked) .doc:not([data-category=kd]),
+.registry:has(.filter__input[value=ot]:checked) .doc:not([data-category=ot]),
+.registry:has(.filter__input[value=pay]:checked) .doc:not([data-category=pay]),
+.registry:has(.filter__input[value=orgs]:checked) .doc:not([data-category=orgs]) {
+  display: none;
+}
+
+/* Home: hero */
+.hero__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2rem 4rem;
+  padding-block-start: 2rem;
+}
+@media (min-width: 1024px) {
+  .hero__inner {
+    padding-block-start: 4rem;
+  }
+}
+
+.hero__text {
+  --stack-gap: 1.25rem;
+  flex: 1 1 30rem;
+}
+
+.kicker {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+.hero__title {
+  font: 600 clamp(1.875rem, 1.25rem + 2.5vw, 3.5rem)/1.12 var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.hero__lead {
+  max-inline-size: 56ch;
+  font-size: 1.125rem;
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-block-start: 0.5rem;
+}
+
+.hero__media {
+  flex: 1 1 24rem;
+}
+
+.hero__img {
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  background: var(--color-surface);
+}
+
+/* Pile child: the badge sits on the photo's corner, on its own solid fill. */
+.hero__badge {
+  place-self: end start;
+  max-inline-size: 13rem;
+  margin: 1rem;
+  padding: 0.75rem 1rem;
+  font: 600 0.875rem/1.35 var(--font-display);
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+}
+
+/* Home: facts */
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.facts__item {
+  display: flex;
+  flex: 1 1 7rem;
+  flex-flow: column;
+  gap: 0.5rem;
+  padding-block-start: 1rem;
+  border-block-start: 0.25rem solid var(--color-fg);
+}
+
+.facts__value {
+  font: 600 clamp(1.75rem, 1.25rem + 2vw, 3rem)/1 var(--font-display);
+  color: var(--color-primary);
+}
+
+/* Home: join band */
+.join {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem 3rem;
+  padding: 1.5rem;
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+}
+@media (min-width: 768px) {
+  .join {
+    padding: 2.5rem 3rem;
+  }
+}
+
+.join__text {
+  --stack-gap: 0.5rem;
+  flex: 1 1 28rem;
+}
+
+.join__title {
+  font: 600 clamp(1.375rem, 1rem + 1.25vw, 2rem)/1.2 var(--font-display);
+}
+
+/* News article */
+.article__head {
+  --stack-gap: 1rem;
+  padding-block: 2rem;
+}
+@media (min-width: 1024px) {
+  .article__head {
+    padding-block: 3rem 2.5rem;
+  }
+}
+
+.article__back {
+  align-self: start;
+  font-weight: 600;
+}
+
+.article__title {
+  max-inline-size: 24em;
+  font: 600 clamp(1.75rem, 1rem + 2.5vw, 3rem)/1.15 var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.article__lead {
+  max-inline-size: 56ch;
+  font-size: 1.25rem;
+  line-height: 1.5;
+}
+
+.article__body {
+  font-size: 1.125rem;
+}
+
+.article__figure {
+  margin-block-end: 2.5rem;
+}
+
+.article__img {
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  background: var(--color-surface);
+}
+
+.article__caption {
+  margin-block-start: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-fg-muted);
+}
+
+.prose h2 {
+  --prose-flow: 1.75em;
+  font: 600 1.375rem/1.3 var(--font-display);
+}
+.prose :is(ul, ol) {
+  padding-inline-start: 1.25em;
+}
+.prose li + li {
+  margin-block-start: 0.5em;
+}
+.prose blockquote {
+  padding-inline-start: 1.25rem;
+  border-inline-start: 0.25rem solid var(--color-primary);
+  font-size: 1.25rem;
+  line-height: 1.5;
+}
+.prose blockquote footer {
+  margin-block-start: 0.5rem;
+  font-size: 1rem;
+  color: var(--color-fg-muted);
+}
+
+/* About */
+.about {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 2rem 4rem;
+}
+
+.about__text {
+  flex: 1 1 28rem;
+  font-size: 1.125rem;
+}
+
+.about__figure {
+  flex: 1 1 24rem;
+}
+
+.about__img {
+  background: var(--color-surface);
+}
+
+.people {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2rem;
+  padding: 0;
+  list-style: none;
+}
+
+.people__item {
+  --stack-gap: 0.25rem;
+  flex: 1 1 14rem;
+  padding-block-start: 1rem;
+  border-block-start: 1px solid var(--color-border);
+}
+
+.people__name {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.people__role {
+  color: var(--color-fg-muted);
+}
+
+.contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.5rem 4rem;
+}
+
+.contacts__list {
+  flex: 2 1 28rem;
+}
+
+.contacts__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+  padding-block: 0.75rem;
+  border-block-end: 1px solid var(--color-border);
+  overflow-wrap: anywhere;
+}
+.contacts__row dt {
+  flex: 0 0 14rem;
+  color: var(--color-fg-muted);
+}
+.contacts__row dd {
+  flex: 1 1 16rem;
+}
+
+.contacts__aside {
+  --stack-gap: 0.75rem;
+  flex: 1 1 18rem;
+}
+
+.contacts__title {
+  font: 600 1.25rem/1.3 var(--font-text);
+}
+
+.branches {
+  padding: 0;
+  list-style: none;
+}
+
+.branches__item {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 1rem;
+  padding-block: 0.75rem;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.credits {
+  --stack-gap: 0.5rem;
+  max-inline-size: 75ch;
+  padding-inline-start: 1.25em;
+  font-size: 0.875rem;
+  color: var(--color-fg-muted);
+}

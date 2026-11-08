@@ -1,0 +1,68 @@
+---
+layout: base.njk
+permalink: documents.html
+navKey: documents
+title: "Нормативные документы"
+description: "Реестр нормативных документов профсоюза «Сцепка»: устав, положения, коллективные договоры, постановления, памятки."
+---
+{% from "macros.njk" import docLink %}
+
+<header class="page-head">
+  <div class="wrap">
+    <p class="eyebrow">Реестр · {{ documents.items.length }} документов</p>
+    <h1 class="page-head__title">Нормативные документы</h1>
+    <p class="page-head__lead">Действующие редакции устава, положений, соглашений и решений органов профсоюза. Документы сгруппированы по категориям; внутри категории новые идут первыми.</p>
+  </div>
+</header>
+
+<div class="wrap registry" data-registry>
+  <div class="registry__tools" data-registry-tools hidden role="search" aria-label="Поиск и фильтр документов">
+    <div class="field">
+      <label class="field__label" for="doc-search">Поиск по названию или номеру</label>
+      <input class="field__input" id="doc-search" type="search" name="q" autocomplete="off" placeholder="Например: устав или ПП-14">
+    </div>
+    <fieldset class="chips">
+      <legend class="field__label">Категория</legend>
+      <div class="chips__list">
+        <label class="chip"><input type="radio" name="cat" value="all" checked> <span>Все <span class="chip__count">{{ documents.items.length }}</span></span></label>
+        {% for g in documents.groups %}
+        <label class="chip"><input type="radio" name="cat" value="{{ g.id }}"> <span>{{ g.name }} <span class="chip__count">{{ g.items.length }}</span></span></label>
+        {% endfor %}
+      </div>
+    </fieldset>
+    <p class="registry__status" data-registry-status aria-live="polite"></p>
+  </div>
+
+  {% for g in documents.groups %}
+  <section class="doc-group" data-group="{{ g.id }}" aria-labelledby="group-{{ g.id }}">
+    <h2 class="doc-group__title" id="group-{{ g.id }}">{{ g.name }} <span class="doc-group__count" data-group-count>{{ g.items.length }}</span></h2>
+    <table class="doc-table" role="table">
+      <thead role="rowgroup">
+        <tr role="row">
+          <th role="columnheader" scope="col" class="doc-table__num">Номер</th>
+          <th role="columnheader" scope="col" class="doc-table__date">Дата</th>
+          <th role="columnheader" scope="col">Название</th>
+          <th role="columnheader" scope="col" class="doc-table__file">Файл</th>
+        </tr>
+      </thead>
+      <tbody role="rowgroup">
+        {% for d in g.items %}
+        <tr role="row" class="doc-row" data-doc data-search="{{ (d.number + ' ' + d.title) | lower }}">
+          <td role="cell" class="doc-row__num"><span class="doc-num">№ {{ d.number }}</span></td>
+          <td role="cell" class="doc-row__date"><time datetime="{{ d.date }}">{{ d.date | numDate }}</time></td>
+          <td role="cell" class="doc-row__title">{{ d.title }}{% if d.note %}<span class="doc-row__note">{{ d.note }}</span>{% endif %}</td>
+          <td role="cell" class="doc-row__file">{{ docLink(d, page.url) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  {% endfor %}
+
+  <p class="registry__empty" data-registry-empty hidden>Ничего не найдено. Попробуйте другой запрос или выберите «Все» категории.</p>
+
+  <aside class="note">
+    <h2 class="note__title">Не нашли нужный документ?</h2>
+    <p>Напишите на <a href="mailto:{{ site.email }}">{{ site.email }}</a> — пришлём копию в течение рабочего дня. Документы первичных организаций хранятся у председателей профкомов.</p>
+  </aside>
+</div>

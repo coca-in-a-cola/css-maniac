@@ -1,0 +1,55 @@
+/*
+  CSS Maniac palette (references/palette.css), unchanged except the brand input.
+  Inputs: the primary color as OKLCH channels + --is-dark (0 | 1).
+  Everything else is derived; contrast is guaranteed by the lightness bounds.
+*/
+
+:root {
+  /* brand #ba2f12, brick red */
+  --primary-l: 0.52;
+  --primary-c: 0.18;
+  --primary-h: 33;
+  --is-dark: 0;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.is-light) {
+    --is-dark: 1;
+
+    color-scheme: dark;
+  }
+}
+
+.is-dark {
+  --is-dark: 1;
+
+  color-scheme: dark;
+}
+
+.is-light {
+  --is-dark: 0;
+
+  color-scheme: light;
+}
+
+/* Re-declared on every theme scope: custom properties compute where declared. */
+:root,
+.is-dark,
+.is-light {
+  --_palette-tint: calc(var(--primary-c) * 0.08);
+  --_palette-primary-l: calc((1 - var(--is-dark)) * min(var(--primary-l), 0.48) + var(--is-dark) * max(var(--primary-l), 0.75));
+
+  /* Darkening keeps the color in sRGB only if chroma shrinks with it. */
+  --_palette-primary-c: calc(var(--primary-c) * min(1, var(--_palette-primary-l) / var(--primary-l)));
+
+  /* Derived. Reassign any of them directly when the design needs it. */
+  --color-bg: oklch(calc(0.985 - 0.8 * var(--is-dark)) var(--_palette-tint) var(--primary-h));
+  --color-surface: oklch(calc(0.955 - 0.7 * var(--is-dark)) var(--_palette-tint) var(--primary-h));
+  --color-border: oklch(calc(0.88 - 0.54 * var(--is-dark)) var(--_palette-tint) var(--primary-h));
+  --color-fg: oklch(calc(0.2 + 0.74 * var(--is-dark)) var(--_palette-tint) var(--primary-h));
+  --color-fg-muted: oklch(calc(0.5 + 0.22 * var(--is-dark)) var(--_palette-tint) var(--primary-h));
+  --color-primary: oklch(var(--_palette-primary-l) var(--_palette-primary-c) var(--primary-h));
+  --color-on-primary: oklch(clamp(0, (var(--_palette-primary-l) / 0.623 - 1) * -1000, 1) 0 0);
+}
