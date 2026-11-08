@@ -1,0 +1,69 @@
+# Builds every union-* site and publishes them side by side on GitHub Pages:
+#   /            index with links
+#   /with-skill/ /without-skill/
+# A site whose build fails is listed as failed; the others still deploy.
+name: Deploy sites to Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build sites
+        run: |
+          mkdir -p _site
+          items=""
+          for dir in union-*/; do
+            name="${dir#union-}"; name="${name%/}"
+            if [ -f "$dir/package.json" ] && (cd "$dir" && npm ci && npm run build) && [ -d "$dir/dist" ]; then
+              cp -r "$dir/dist" "_site/$name"
+              items="$items<li><a href=\"$name/\">$name</a></li>"
+            else
+              items="$items<li>$name — build failed</li>"
+            fi
+          done
+          cat > _site/index.html <<EOF
+          <!doctype html>
+          <html lang="en">
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>CSS Maniac — A/B sites</title>
+          <style>body { max-inline-size: 40rem; margin: 2rem auto; padding-inline: 1rem; font: 1.125rem/1.5 system-ui; }</style>
+          <h1>CSS Maniac — A/B sites</h1>
+          <ul>$items</ul>
+          <p>Commit ${GITHUB_SHA::7}</p>
+          </html>
+          EOF
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

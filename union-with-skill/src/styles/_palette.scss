@@ -1,14 +1,14 @@
 /*
-  CSS Maniac palette (references/palette.css), unchanged except the brand input.
-  Inputs: the primary color as OKLCH channels + --is-dark (0 | 1).
-  Everything else is derived; contrast is guaranteed by the lightness bounds.
+  Палитра «Опоры». Базовых цвета два: синий «брусок» и сигнальный оранжевый.
+  Остальное вычисляется в OKLCH (схема из css-maniac/references/palette.css).
+  Контраст держится на математике: нейтрали смешиваются линейно по L,
+  текст и заливки от базы получают зажатую L, цвет текста на заливке выбирается по яркости WCAG.
+  Здесь — единственное место, где живут литеральные цвета.
 */
 
 :root {
-  /* brand #ba2f12, brick red */
-  --primary-l: 0.52;
-  --primary-c: 0.18;
-  --primary-h: 33;
+  --base-brand: oklch(0.4 0.12 255); /* глубокий синий */
+  --base-accent: oklch(0.74 0.17 55); /* сигнальный оранжевый */
   --is-dark: 0;
 
   color-scheme: light;
@@ -34,22 +34,44 @@
   color-scheme: light;
 }
 
-/* Re-declared on every theme scope: custom properties compute where declared. */
+/* Объявляется заново на каждом переключателе темы: свойства вычисляются там, где объявлены. */
 :root,
 .is-dark,
 .is-light {
-  --_palette-tint: calc(var(--primary-c) * 0.08);
-  --_palette-primary-l: calc((1 - var(--is-dark)) * min(var(--primary-l), 0.48) + var(--is-dark) * max(var(--primary-l), 0.75));
+  --_palette-paper: oklch(calc(0.985 - 0.8 * var(--is-dark)) 0 none);
+  --_palette-ink: oklch(calc(0.2 + 0.74 * var(--is-dark)) 0 none);
+  --_palette-deep: oklch(calc(0.22 - 0.1 * var(--is-dark)) 0 none);
+  --color-bg: color-mix(in oklch, var(--base-accent) 6%, var(--_palette-paper));
+  --color-card: color-mix(in oklch, var(--color-bg) 35%, var(--_palette-paper));
+  --color-surface: color-mix(in oklch, var(--color-bg), var(--_palette-ink) 5%);
+  --color-border: color-mix(in oklch, var(--color-bg), var(--_palette-ink) 18%);
+  --color-fg: color-mix(in oklch, var(--base-brand) 8%, var(--_palette-ink));
+  --color-fg-muted: color-mix(in oklch, var(--color-fg), var(--color-bg) 35%);
+  --color-brand: var(--base-brand);
+  --color-on-brand: oklch(1 0 0);
+  --color-on-accent: oklch(0.2 0 0);
+  --color-deep: color-mix(in oklch, var(--base-brand) 25%, var(--_palette-deep));
+  --color-on-deep: oklch(0.96 0 none);
+  --color-on-deep-muted: color-mix(in oklch, var(--color-on-deep), var(--color-deep) 30%);
+}
 
-  /* Darkening keeps the color in sRGB only if chroma shrinks with it. */
-  --_palette-primary-c: calc(var(--primary-c) * min(1, var(--_palette-primary-l) / var(--primary-l)));
-
-  /* Derived. Reassign any of them directly when the design needs it. */
-  --color-bg: oklch(calc(0.985 - 0.8 * var(--is-dark)) var(--_palette-tint) var(--primary-h));
-  --color-surface: oklch(calc(0.955 - 0.7 * var(--is-dark)) var(--_palette-tint) var(--primary-h));
-  --color-border: oklch(calc(0.88 - 0.54 * var(--is-dark)) var(--_palette-tint) var(--primary-h));
-  --color-fg: oklch(calc(0.2 + 0.74 * var(--is-dark)) var(--_palette-tint) var(--primary-h));
-  --color-fg-muted: oklch(calc(0.5 + 0.22 * var(--is-dark)) var(--_palette-tint) var(--primary-h));
-  --color-primary: oklch(var(--_palette-primary-l) var(--_palette-primary-c) var(--primary-h));
-  --color-on-primary: oklch(clamp(0, (var(--_palette-primary-l) / 0.623 - 1) * -1000, 1) 0 0);
+@supports (color: oklch(from red l c h)) {
+  :root,
+  .is-dark,
+  .is-light {
+    --color-brand: oklch(
+      from var(--base-brand)
+      calc((1 - var(--is-dark)) * min(l, 0.48) + var(--is-dark) * max(l, 0.75))
+      calc(c * min(1, ((1 - var(--is-dark)) * min(l, 0.48) + var(--is-dark) * max(l, 0.75)) / l))
+      h
+    );
+    --color-on-brand: oklch(
+      from color(from var(--color-brand) xyz-d65 calc(y * 0.9505) y calc(y * 1.0888))
+      clamp(0, (0.5636 - l) * infinity, 1) 0 0
+    );
+    --color-on-accent: oklch(
+      from color(from var(--base-accent) xyz-d65 calc(y * 0.9505) y calc(y * 1.0888))
+      clamp(0, (0.5636 - l) * infinity, 1) 0 0
+    );
+  }
 }

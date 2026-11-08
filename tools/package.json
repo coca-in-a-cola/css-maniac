@@ -1,0 +1,11 @@
+{
+  "name": "css-maniac-tools",
+  "private": true,
+  "description": "A/B comparison harness. Not part of the skill.",
+  "devDependencies": {
+    "stylelint": "^17.0.0",
+    "stylelint-config-standard": "^40.0.0",
+    "stylelint-config-standard-scss": "^17.0.0",
+    "stylelint-use-logical": "^2.0.0"
+  }
+}

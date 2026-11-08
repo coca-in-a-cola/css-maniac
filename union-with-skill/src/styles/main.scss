@@ -1,7 +1,913 @@
-// Plain CSS with native nesting; SCSS only for the breakpoint mixin and splitting files.
+@use "breakpoints" as *;
 @use "palette";
-@use "fonts";
-@use "base";
-@use "layout";
-@use "components";
-@use "pages";
+
+@font-face {
+  font-family: "Golos Text";
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("fonts/golos-text-cyrillic-wght-normal.woff2") format("woff2");
+  unicode-range: u+0301, u+0400-045f, u+0490-0491, u+04b0-04b1, u+2116;
+}
+
+@font-face {
+  font-family: "Golos Text";
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("fonts/golos-text-latin-wght-normal.woff2") format("woff2");
+  unicode-range: u+0000-00ff, u+0131, u+0152-0153, u+02bb-02bc, u+02c6, u+02da, u+02dc, u+2000-206f, u+20ac, u+2122, u+2191, u+2193, u+2212, u+2215, u+feff, u+fffd;
+}
+
+@font-face {
+  font-family: Unbounded;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url("fonts/unbounded-cyrillic-wght-normal.woff2") format("woff2");
+  unicode-range: u+0301, u+0400-045f, u+0490-0491, u+04b0-04b1, u+2116;
+}
+
+@font-face {
+  font-family: Unbounded;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url("fonts/unbounded-latin-wght-normal.woff2") format("woff2");
+  unicode-range: u+0000-00ff, u+0131, u+0152-0153, u+02bb-02bc, u+02c6, u+02da, u+02dc, u+2000-206f, u+20ac, u+2122, u+2191, u+2193, u+2212, u+2215, u+feff, u+fffd;
+}
+
+/* Сброс */
+*,
+::before,
+::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+img,
+svg {
+  display: block;
+  max-inline-size: 100%;
+}
+
+img {
+  block-size: auto;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+:is(ul, ol)[class] {
+  padding: 0;
+  list-style: none;
+}
+
+/*
+  Корневой размер масштабирует весь интерфейс (всё в rem).
+  На телефонах крупнее; скачок на 768px задуман.
+*/
+html {
+  font-size: clamp(100%, 75% + 1.5vw, 118.75%);
+
+  @include size(md) {
+    font-size: 100%;
+  }
+}
+
+body {
+  display: flex;
+  flex-flow: column;
+  min-block-size: 100dvh;
+  color: var(--color-fg);
+  font: 400 1rem/1.6 "Golos Text", system-ui, sans-serif;
+  background: var(--color-bg);
+}
+
+main {
+  flex: 1;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 700;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+a {
+  color: var(--color-brand);
+  text-underline-offset: 0.2em;
+
+  @media (hover: hover) {
+    &:hover {
+      text-decoration-thickness: 0.125rem;
+    }
+  }
+}
+
+:focus-visible {
+  outline: 0.1875rem solid var(--focus-color, var(--color-brand));
+  outline-offset: 0.25rem;
+}
+
+/* Примитивы: Stack, Prose, Pile */
+.stack {
+  display: flex;
+  flex-flow: column;
+  gap: var(--stack-gap, 1rem);
+}
+
+.prose {
+  max-inline-size: 65ch;
+
+  > * + * {
+    margin-block-start: var(--prose-flow, 1em);
+  }
+
+  > h2 {
+    margin-block-start: 1.5em;
+    font-size: 1.5rem;
+  }
+}
+
+.pile {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+
+  > * {
+    grid-area: 1 / 1;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link:focus-visible {
+  inset: 0.5rem auto auto 0.5rem;
+  inline-size: auto;
+  block-size: auto;
+  padding: 0.75rem 1rem;
+  overflow: visible;
+  clip-path: none;
+  background: var(--color-card);
+  z-index: 1;
+}
+
+.wrap {
+  inline-size: min(100% - 2rem, var(--wrap-size, 72rem));
+  margin-inline: auto;
+}
+
+/* Кнопка. Публичное API: --button-bg, --button-fg, --button-border */
+.app-button {
+  --_button-bg: var(--button-bg, var(--color-brand));
+  --_button-fg: var(--button-fg, var(--color-on-brand));
+  --_button-bg-hover: var(--button-bg-hover, color-mix(in oklch, var(--_button-bg), var(--_button-fg) 8%));
+  --_button-bg-active: var(--button-bg-active, color-mix(in oklch, var(--_button-bg), var(--_button-fg) 10%));
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-block-size: 2.75rem;
+  padding: 0.5em 1.25em;
+  border: 1px solid var(--button-border, transparent);
+  border-radius: 0.25rem;
+  color: var(--_button-fg);
+  font-weight: 700;
+  text-decoration: none;
+  background: var(--_button-bg);
+  cursor: pointer;
+
+  @media (hover: hover) {
+    &:hover {
+      background: var(--_button-bg-hover);
+    }
+  }
+
+  &:active {
+    background: var(--_button-bg-active);
+  }
+}
+
+.app-button--accent {
+  --button-bg: var(--base-accent);
+  --button-fg: var(--color-on-accent);
+}
+
+.app-button--ghost {
+  --button-bg: transparent;
+  --button-fg: var(--color-brand);
+  --button-border: currentcolor;
+}
+
+/* Плашка. Публичное API: --badge-bg, --badge-fg, --badge-border */
+.app-badge {
+  display: inline-flex;
+  align-items: center;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--badge-border, transparent);
+  border-radius: 999px;
+  color: var(--badge-fg, var(--color-fg));
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.5;
+  background: var(--badge-bg, color-mix(in oklch, var(--color-bg), var(--color-fg) 10%));
+}
+
+.app-badge--active {
+  --badge-bg: color-mix(in oklch, var(--color-card), var(--color-brand) 18%);
+}
+
+.app-badge--enrol {
+  --badge-bg: var(--base-accent);
+  --badge-fg: var(--color-on-accent);
+}
+
+.app-badge--done {
+  --badge-bg: color-mix(in oklch, var(--color-card), var(--color-fg) 14%);
+}
+
+.app-badge--planned {
+  --badge-bg: transparent;
+  --badge-border: currentcolor;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-fg-muted);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  &::before {
+    content: "";
+    flex: none;
+    inline-size: 0.75rem;
+    block-size: 0.75rem;
+    background: var(--base-accent);
+  }
+}
+
+/* Шапка */
+.site-header {
+  border-block-start: 0.5rem solid var(--base-accent);
+  border-block-end: 1px solid var(--color-border);
+  background: var(--color-card);
+}
+
+.site-header__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+  padding-block: 0.75rem;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-fg);
+  text-decoration: none;
+}
+
+.brand__mark {
+  flex: none;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+}
+
+.brand__mark-bg {
+  fill: var(--color-brand);
+}
+
+.brand__mark-fg {
+  fill: var(--color-on-brand);
+}
+
+.brand__mark-accent {
+  fill: var(--base-accent);
+}
+
+.brand__text {
+  display: flex;
+  flex-flow: column;
+}
+
+.brand__name {
+  font-family: Unbounded, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.brand__tag {
+  color: var(--color-fg-muted);
+  font-size: 0.875rem;
+  line-height: 1.2;
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.25rem;
+}
+
+.site-nav__link {
+  display: block;
+  padding-block: 0.75rem 0.5rem;
+  border-block-end: 0.25rem solid transparent;
+  color: var(--color-fg);
+  font-weight: 600;
+  text-decoration: none;
+
+  @media (hover: hover) {
+    &:hover {
+      border-color: var(--color-border);
+    }
+  }
+
+  &[aria-current="page"] {
+    border-color: var(--base-accent);
+  }
+}
+
+/* Заголовок страницы */
+.page-head {
+  padding-block: 2rem;
+  border-block-end: 1px solid var(--color-border);
+  background: var(--color-surface);
+
+  @include size(md) {
+    padding-block: 3.5rem;
+  }
+}
+
+.page-head__title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+
+  @include size(md) {
+    font-size: 3rem;
+  }
+}
+
+.page-head__lead {
+  max-inline-size: 45ch;
+  font-size: 1.125rem;
+}
+
+/* Секции */
+.section {
+  padding-block: 2.5rem;
+
+  @include size(md) {
+    padding-block: 4rem;
+  }
+}
+
+.section--band {
+  border-block: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.section__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+}
+
+.section__title {
+  font-family: Unbounded, sans-serif;
+  font-size: 1.375rem;
+  font-weight: 700;
+
+  @include size(md) {
+    font-size: 1.75rem;
+  }
+
+  &::before {
+    content: "";
+    display: block;
+    inline-size: 3rem;
+    block-size: 0.5rem;
+    margin-block-end: 0.75rem;
+    background: repeating-linear-gradient(90deg, var(--base-accent) 0 0.25rem, transparent 0.25rem 0.5rem);
+  }
+}
+
+.section__more {
+  font-weight: 600;
+}
+
+/* Главная: первый экран */
+.hero {
+  padding-block: 2rem 3rem;
+
+  @include size(md) {
+    padding-block: 4rem 5rem;
+  }
+}
+
+.hero__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2.5rem 3rem;
+}
+
+.hero__text {
+  flex: 1 1 24rem;
+
+  --stack-gap: 1.25rem;
+}
+
+.hero__title {
+  font-family: Unbounded, sans-serif;
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.15;
+
+  @include size(md) {
+    font-size: 2.75rem;
+  }
+}
+
+.hero__lead {
+  max-inline-size: 40ch;
+  font-size: 1.125rem;
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.hero__media {
+  flex: 1 1 24rem;
+  align-self: stretch;
+  min-inline-size: 0;
+}
+
+.hero__photo {
+  inline-size: 100%;
+  min-block-size: 100%;
+  aspect-ratio: 4 / 3;
+  place-self: stretch;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  background: var(--color-surface);
+  box-shadow: 0.5rem 0.5rem 0 var(--base-accent);
+}
+
+.hero__badge {
+  place-self: end start;
+  max-inline-size: 15rem;
+  margin: 1rem;
+  padding: 0.75rem 1rem;
+  border-inline-start: 0.5rem solid var(--base-accent);
+  background: var(--color-card);
+  z-index: 1;
+}
+
+/* Цифры */
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.stats__item {
+  display: flex;
+  flex: 1 1 10rem;
+  flex-flow: column;
+  padding-inline-start: 1rem;
+  border-inline-start: 0.25rem solid var(--base-accent);
+}
+
+.stats__value {
+  font-family: Unbounded, sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.stats__label {
+  color: var(--color-fg-muted);
+}
+
+/* Карточки: колонки выровнены между рядами, поэтому grid */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-flow: column;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-card);
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: transform 0.2s;
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      transform: translateY(-0.25rem);
+    }
+  }
+
+  &:has(.card__link:focus-visible) {
+    outline: 0.1875rem solid var(--color-brand);
+    outline-offset: 0.25rem;
+  }
+}
+
+.card__media {
+  inline-size: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  background: var(--color-surface);
+}
+
+.card__body {
+  display: flex;
+  flex: 1;
+  flex-flow: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+}
+
+.card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  color: var(--color-fg-muted);
+  font-size: 0.875rem;
+}
+
+.card__title {
+  font-size: 1.25rem;
+  line-height: 1.3;
+}
+
+.card__link {
+  color: var(--color-fg);
+  text-decoration: none;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+}
+
+.card__facts {
+  margin-block-start: auto;
+  padding-block-start: 0.75rem;
+  border-block-start: 1px dashed var(--color-border);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Реестр документов */
+.registry__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+}
+
+.chip {
+  cursor: pointer;
+}
+
+.chip__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-block-size: 2.75rem;
+  padding: 0.25rem 1rem;
+  border: 1px solid var(--color-fg-muted);
+  border-radius: 999px;
+  font-weight: 600;
+  background: var(--color-card);
+}
+
+.chip__count {
+  padding-inline: 0.5rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  background: color-mix(in oklch, currentcolor 15%, transparent);
+}
+
+.chip:has(.chip__input:checked) .chip__label {
+  border-color: transparent;
+  color: var(--color-on-brand);
+  background: var(--color-brand);
+}
+
+.chip:has(.chip__input:focus-visible) .chip__label {
+  outline: 0.1875rem solid var(--color-brand);
+  outline-offset: 0.25rem;
+}
+
+@media (hover: hover) {
+  .chip:hover .chip__label {
+    border-color: var(--color-brand);
+  }
+}
+
+.registry:has([value="charter"]:checked) .doc:not([data-cat="charter"]),
+.registry:has([value="contracts"]:checked) .doc:not([data-cat="contracts"]),
+.registry:has([value="safety"]:checked) .doc:not([data-cat="safety"]),
+.registry:has([value="wages"]:checked) .doc:not([data-cat="wages"]),
+.registry:has([value="decisions"]:checked) .doc:not([data-cat="decisions"]) {
+  display: none;
+}
+
+.registry__list {
+  --stack-gap: 0.75rem;
+}
+
+.registry__note {
+  color: var(--color-fg-muted);
+  font-size: 0.875rem;
+}
+
+.doc {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-card);
+}
+
+.doc__id {
+  display: flex;
+  flex: 0 0 8rem;
+  flex-flow: column;
+  color: var(--color-fg-muted);
+  font-size: 0.875rem;
+}
+
+.doc__number {
+  color: var(--color-fg);
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.doc__main {
+  display: flex;
+  flex: 1 1 16rem;
+  flex-flow: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  min-inline-size: 0;
+}
+
+.doc__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.doc__file {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.doc__size {
+  color: var(--color-fg-muted);
+  font-size: 0.875rem;
+}
+
+/* Статья */
+.article__wrap {
+  --wrap-size: 48rem;
+  --stack-gap: 1.5rem;
+
+  padding-block: 2rem 3rem;
+}
+
+.article__back {
+  font-weight: 600;
+}
+
+.article__title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+
+  @include size(md) {
+    font-size: 2.75rem;
+  }
+}
+
+.article__lead {
+  font-size: 1.25rem;
+}
+
+.article__photo {
+  inline-size: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  background: var(--color-surface);
+}
+
+.article__body {
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+
+/* О профсоюзе */
+.about {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.5rem 4rem;
+}
+
+.about__col {
+  flex: 1 1 20rem;
+  min-inline-size: 0;
+}
+
+.about__title {
+  font-size: 1.5rem;
+}
+
+.about__address {
+  font-style: normal;
+  line-height: 1.8;
+}
+
+.facts {
+  display: flex;
+  flex-flow: column;
+}
+
+.facts__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+  padding-block: 0.75rem;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.facts__term {
+  flex: 0 0 10rem;
+  color: var(--color-fg-muted);
+  font-weight: 600;
+}
+
+.facts__desc {
+  flex: 1 1 12rem;
+}
+
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  counter-reset: step;
+}
+
+.steps__item {
+  display: flex;
+  flex: 1 1 15rem;
+  flex-flow: column;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-card);
+  counter-increment: step;
+
+  &::before {
+    content: counter(step);
+    color: var(--color-brand);
+    font-family: Unbounded, sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+}
+
+.steps__title {
+  font-size: 1.25rem;
+}
+
+/* Призыв вступить */
+.cta {
+  --focus-color: var(--base-accent);
+
+  color: var(--color-on-brand);
+  background: var(--color-brand);
+}
+
+.cta__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem 3rem;
+}
+
+.cta__text {
+  flex: 1 1 20rem;
+  max-inline-size: 45ch;
+}
+
+.cta__title {
+  font-family: Unbounded, sans-serif;
+  font-size: 1.5rem;
+
+  @include size(md) {
+    font-size: 2rem;
+  }
+}
+
+/* Подвал */
+.site-footer {
+  --focus-color: var(--base-accent);
+
+  padding-block: 2.5rem 1.5rem;
+  color: var(--color-on-deep);
+  background: var(--color-deep);
+
+  a {
+    color: inherit;
+  }
+}
+
+.site-footer__cols {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem 3rem;
+}
+
+.site-footer__col {
+  flex: 1 1 14rem;
+}
+
+.site-footer__title {
+  margin-block-end: 0.5rem;
+  font-weight: 700;
+}
+
+.site-footer__muted,
+.site-footer__legal {
+  color: var(--color-on-deep-muted);
+}
+
+.site-footer__address {
+  font-style: normal;
+  line-height: 1.8;
+}
+
+.site-footer__list {
+  display: flex;
+  flex-flow: column;
+  gap: 0.25rem;
+}
+
+.site-footer__legal {
+  margin-block-start: 2rem;
+  padding-block-start: 1.5rem;
+  border-block-start: 1px solid var(--color-on-deep-muted);
+  font-size: 0.875rem;
+}
