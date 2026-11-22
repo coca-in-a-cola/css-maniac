@@ -1,0 +1,14 @@
+{
+  "name": "css-maniac",
+  "description": "CSS Maniac: hand-coder discipline for AI-written CSS/SCSS.",
+  "owner": {
+    "name": "coca-in-a-cola"
+  },
+  "plugins": [
+    {
+      "name": "css-maniac",
+      "source": "./",
+      "description": "Write, fix and review CSS/SCSS like an experienced hand-coder, following the project's own conventions."
+    }
+  ]
+}

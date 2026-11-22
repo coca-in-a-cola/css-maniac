@@ -1,1 +1,0 @@
-{"with-skill": {"model": "sonnet", "tokens": 147261, "tool_calls": 47, "minutes": 7.5}, "without-skill": {"model": "sonnet", "tokens": 120217, "tool_calls": 44, "minutes": 4.6}}

@@ -1,0 +1,101 @@
+/*
+  CSS Maniac palette. The one file where literal colors live.
+
+  Base colors: the few colors the design is built on. Here: brand and accent.
+  The design decides how many. Each base is ONE variable holding ONE whole
+  color, written as the designer gave it (hex stays hex: converting by hand
+  drifts). A theme switch or a JS picker changes one variable.
+  Every other color is computed from the bases in OKLCH, and every computed
+  color is a plain variable you can reassign.
+
+  Themes: light-dark(). A custom property holding light-dark() is resolved
+  where it is used, by that element's color-scheme. So the derived colors are
+  declared once, and `.is-dark` / `.is-light` on any element switch its whole
+  subtree. No second palette, no re-declaration per theme. Only `color`,
+  which inherits as a resolved value, is re-applied on the theme scope.
+
+  Contrast comes from math, not from the eye:
+  - Neutrals are paper and ink (hue `none`) tinted with a base through
+    color-mix in OKLCH. Mixing is linear in L, so bg/fg contrast holds for
+    any base.
+  - A base used as a FILL stays exactly as given. Its text color is black or
+    white by WCAG luminance: contrast-color() where supported, else the same
+    flip computed with relative color (in xyz-d65, y IS WCAG luminance; a gray
+    of that luminance has OKLCH L = cbrt(Y); black and white both give 4.58:1
+    at Y = 0.17913, so the flip is at L 0.5636). Either way >= 4.58:1 on any
+    sRGB fill. No OKLCH L threshold is safe: Lea Verou's 0.623 fails ~10%.
+  - A base used as TEXT or an icon on the background gets its L clamped:
+    <= 0.48 light, >= 0.75 dark, chroma shrinking with it in light
+    (Material's tone 40 / 80 idea).
+  Relative color and contrast-color() are Baseline newly available: they sit
+  in @supports. Without them, text-brand falls back to the base as given and
+  on-colors to the literal set below: pick it for your bases.
+  --color-border is decorative (dividers). A meaningful input border uses
+  --color-fg-muted.
+*/
+
+:root {
+  --base-brand: #4f46e5;
+  --base-accent: #f6b93b;
+  --_palette-paper: light-dark(oklch(0.985 0 none), oklch(0.185 0 none));
+  --_palette-ink: light-dark(oklch(0.2 0 none), oklch(0.94 0 none));
+
+  /* Derived. Reassign any of them directly when the design needs it. */
+  --color-bg: color-mix(in oklch, var(--base-brand) 3%, var(--_palette-paper));
+  --color-surface: color-mix(in oklch, var(--color-bg), var(--_palette-ink) 5%);
+  --color-border: color-mix(in oklch, var(--color-bg), var(--_palette-ink) 15%);
+  --color-fg: color-mix(in oklch, var(--base-brand) 8%, var(--_palette-ink));
+  --color-fg-muted: color-mix(in oklch, var(--color-fg), var(--color-bg) 35%);
+
+  /* Fills: the bases exactly as given. */
+  --color-brand: var(--base-brand);
+  --color-accent: var(--base-accent);
+
+  /* Text and icons in a base's hue, readable on --color-bg. */
+  --color-brand-text: var(--base-brand);
+
+  /* Text on a fill. Fallback for browsers without relative color. */
+  --color-on-brand: oklch(1 0 0);
+  --color-on-accent: oklch(0.2 0 0);
+
+  color-scheme: light dark;
+}
+
+/* Inherited `color` is already resolved, so a theme scope re-applies its own. */
+.is-light,
+.is-dark {
+  color: var(--color-fg);
+  background: var(--color-bg);
+}
+
+.is-light {
+  color-scheme: light;
+}
+
+.is-dark {
+  color-scheme: dark;
+}
+
+@supports (color: oklch(from red l c h)) {
+  :root {
+    --color-brand-text: light-dark(
+      oklch(from var(--base-brand) min(l, 0.48) calc(c * min(1, 0.48 / l)) h),
+      oklch(from var(--base-brand) max(l, 0.75) c h)
+    );
+    --color-on-brand: oklch(
+      from color(from var(--base-brand) xyz-d65 calc(y * 0.9505) y calc(y * 1.0888))
+      clamp(0, (0.5636 - l) * infinity, 1) 0 0
+    );
+    --color-on-accent: oklch(
+      from color(from var(--base-accent) xyz-d65 calc(y * 0.9505) y calc(y * 1.0888))
+      clamp(0, (0.5636 - l) * infinity, 1) 0 0
+    );
+  }
+}
+
+@supports (color: contrast-color(red)) {
+  :root {
+    --color-on-brand: contrast-color(var(--base-brand));
+    --color-on-accent: contrast-color(var(--base-accent));
+  }
+}

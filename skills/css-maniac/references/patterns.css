@@ -1,0 +1,225 @@
+/*
+  CSS Maniac reference patterns. Copy only what the project uses.
+  Colors come from palette.css. Breakpoints: 48rem = md (see _breakpoints.scss).
+*/
+
+/* Minimal reset. Stack, Prose and Pile assume margins start at 0. */
+*,
+::before,
+::after {
+  box-sizing: border-box;
+}
+
+/* :where() keeps it at zero specificity, so any class still wins.
+   dialog and [popover] keep the UA `margin: auto` that centers them. */
+:where(:not(dialog, [popover])) {
+  margin: 0;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-inline-size: 100%;
+}
+
+/* With width/height attributes, a shrunk image keeps its ratio instead of squashing. */
+img,
+video {
+  block-size: auto;
+}
+
+/* Form fields inherit the root size, so they stay >= 16px and iOS won't zoom. */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/*
+  Root scale. All UI is in rem, so this scales everything.
+  Mobile gets bigger UI on purpose; the jump at md is intended.
+  The % term keeps browser zoom and the user's font setting working.
+  rem in a media query means the browser default size, not this one,
+  so breakpoints don't move when the root grows.
+*/
+html {
+  font-size: clamp(100%, 62.5% + 2.5vw, 137.5%);
+}
+
+@media (min-width: 48rem) {
+  html {
+    font-size: 100%;
+  }
+}
+
+body {
+  color: var(--color-fg);
+  background: var(--color-bg);
+}
+
+/* Fluid heading: always a rem term next to vw, or zoom stops working. */
+h1 {
+  font-size: clamp(2rem, 1.5rem + 2vw, 3rem);
+  line-height: 1.1;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* Stack: vertical rhythm between components. Override per instance: --stack-gap. */
+.stack {
+  display: flex;
+  flex-flow: column;
+  gap: var(--stack-gap, 1rem);
+}
+
+/* Prose (Kevin Powell's flow): running text. em follows each element's own font size. */
+.prose {
+  max-inline-size: 65ch;
+  overflow-wrap: break-word;
+}
+
+.prose > * + * {
+  margin-block-start: var(--prose-flow, 1em);
+}
+
+/* Cluster: items that wrap, each at least ~15rem, shrinking below it on narrow screens. */
+.cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.cluster > * {
+  flex: 1 1 15rem;
+}
+
+/*
+  Pile: layers without absolute positioning. Place children with place-self.
+  minmax(0, 1fr): an image's intrinsic width can't widen the track and overflow the page.
+*/
+.pile {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+}
+
+.pile > * {
+  grid-area: 1 / 1;
+}
+
+/*
+  Mini-component. Public API: --button-bg, --button-fg, --button-bg-hover, --button-bg-active.
+  Nobody sets them by default: each private var reads its public one first,
+  then falls back to a value computed in OKLCH from the base.
+  Change --button-bg alone and every state follows.
+  State layers (Material 3 sizes): hover 8%, pressed 10%, mixed AWAY from the
+  text color, so a state can only gain contrast. Without relative color the
+  shade falls back to the text color itself.
+  The transparent border is not decoration: in forced-colors mode it becomes
+  the button's visible edge.
+*/
+.app-button {
+  --_button-bg: var(--button-bg, var(--color-brand));
+  --_button-fg: var(--button-fg, var(--color-on-brand));
+  --_button-shade: var(--_button-fg);
+  --_button-bg-hover: var(--button-bg-hover, color-mix(in oklch, var(--_button-bg), var(--_button-shade) 8%));
+  --_button-bg-active: var(--button-bg-active, color-mix(in oklch, var(--_button-bg), var(--_button-shade) 10%));
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  min-block-size: 1.5rem;
+  padding: 0.5em 1em;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--_button-fg);
+  background: var(--_button-bg);
+  cursor: pointer;
+  transition: background-color 0.15s;
+
+  @media (hover: hover) {
+    &:hover {
+      background: var(--_button-bg-hover);
+    }
+  }
+
+  &:active {
+    background: var(--_button-bg-active);
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid var(--color-brand-text);
+    outline-offset: 0.125rem;
+  }
+}
+
+@supports (color: oklch(from red l c h)) {
+  .app-button {
+    --_button-shade: oklch(from var(--_button-fg) calc(1 - l) 0 0);
+  }
+}
+
+/* Modifiers set public vars only. A ghost tints toward its text instead. */
+.app-button--ghost {
+  --button-bg: transparent;
+  --button-fg: var(--color-brand-text);
+  --button-bg-hover: color-mix(in oklch, var(--color-brand-text) 8%, transparent);
+  --button-bg-active: color-mix(in oklch, var(--color-brand-text) 10%, transparent);
+}
+
+/*
+  Open/close animation for dialog and popover, no JS.
+  @starting-style and allow-discrete are progressive: without them it just appears.
+*/
+@media (prefers-reduced-motion: no-preference) {
+  .app-dialog {
+    transition:
+      opacity 0.2s,
+      transform 0.2s,
+      overlay 0.2s allow-discrete,
+      display 0.2s allow-discrete;
+  }
+
+  .app-dialog:not([open], :popover-open) {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+
+  @starting-style {
+    .app-dialog:is([open], :popover-open) {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+}
+
+/* Allowed absolute #1: the whole card is clickable through its one link. */
+.card {
+  position: relative;
+}
+
+.card__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* Allowed absolute #2: hidden visually, kept for screen readers. */
+.visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

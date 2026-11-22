@@ -1,0 +1,25 @@
+@use "sass:map";
+
+// One set for the whole app. Mobile-first, min-width, rem boundaries.
+// rem in a media query is the browser's default font size (usually 16px),
+// not the root font-size: the mobile root scale doesn't move these, the
+// user's own font setting does. Fill the values per project.
+// Styles outside any mixin are the base: the smallest phones.
+$breakpoints: (
+  xs: 22.5rem, // 360px
+  sm: 36rem, // 576px
+  md: 48rem, // 768px
+  lg: 64rem, // 1024px
+  xl: 90rem, // 1440px
+);
+
+// @include size(md) { … }
+@mixin size($name) {
+  @if not map.has-key($breakpoints, $name) {
+    @error "Unknown breakpoint `#{$name}`. Use one of: #{map.keys($breakpoints)}.";
+  }
+
+  @media (min-width: map.get($breakpoints, $name)) {
+    @content;
+  }
+}
