@@ -1,63 +1,82 @@
 # CSS Maniac
 
-An agent skill that makes AI write, fix and review CSS/SCSS like someone who has hand-written it for years. Modeled on [ub-mode](https://github.com/unclebob/ub-mode): short imperative rules, backed by checks instead of good intentions.
+English · [Русский](README.ru.md)
 
-AI-written CSS works on the screenshot and rots in the codebase: `!important` to win a fight, `overflow: hidden` over a bug, `z-index: 9999`, hex colors copied from the design tool, a `@media` per component, a new style for every file. CSS Maniac makes the agent work the way a careful senior does: learn the project's conventions, find the cause, make the smallest edit, prove it.
+Give your coding agent a practical CSS workflow: learn the project's conventions, find the cause of a styling problem, and make the smallest fitting change. CSS Maniac is a reusable skill for writing, fixing and reviewing CSS and SCSS—not a linter or a guarantee of correct output.
 
-## What it does
-
-- **Conventions first.** Reads the project's `## CSS conventions` from `ARCHITECTURE.md` (nested files per subtree; the nearest wins). Missing? For new work it asks you, offering sensible defaults, and writes them down. For a quick fix it infers them from the file it edits, then suggests you state them.
-- **Architecture before the change.** A big change starts by reading the project's CSS architecture and extending it; styles split into files per component, rules in markup order.
-- **Flat markup.** Fewest elements; `display: contents` on wrappers a framework forces but styles don't need.
-- **Diagnose before fixing.** Finds the rule that actually wins and fixes it there. No appended overrides, no `!important`.
-- **Rule of least power.** HTML → CSS → SCSS → JS. Native controls and their state before JS and extra classes.
-- **Baseline.** Widely available by default; newer features only when they degrade harmlessly or sit in `@supports` with a fallback.
-- **Smallest edit, least code.** Removes AI noise: restated defaults, magic numbers, wrapper divs, zombie rules. Unused selectors are listed and deleted only with your approval.
-- **Layout.** Flex-first by default, intrinsic before `@container` before `@media`, primitives (Stack, Prose, Cluster, Pile), one grid unit, rem-scaled UI.
-- **Color by math.** A few base colors; everything else derived in OKLCH with `light-dark()` themes, guaranteed text contrast and state layers that never lose it.
-- **Checks before done.** The project's linter, a visual pin of every breakpoint and theme, WCAG contrast. A structured review mode.
-
-Every default is just that: the project's conventions override all of them.
+**[Install](#install) · [Examples](#examples) · [First task](#first-task) · [What's inside](#whats-inside)**
 
 ## Install
 
-Claude Code (2.1.275 or later):
+With Node.js and the [skills CLI](https://github.com/vercel-labs/skills), run in your project:
 
-```
-/plugin install css-maniac --marketplace coca-in-a-cola/css-maniac-workspace
+```sh
+npx skills add coca-in-a-cola/css-maniac --skill css-maniac
 ```
 
-Or in two steps:
+Select your agent and installation scope when prompted. This repository must be public or accessible to your Git client. Review the skill before installing: agent skills are instructions that run with the agent's permissions.
 
-```
-/plugin marketplace add coca-in-a-cola/css-maniac-workspace
+**Claude Code:** alternatively, in a session, add the marketplace and install the plugin:
+
+```text
+/plugin marketplace add coca-in-a-cola/css-maniac
 /plugin install css-maniac@css-maniac
 ```
 
-Any other agent with skills support: copy `skills/css-maniac/` into its skills folder (for Claude Code without the plugin system, `~/.claude/skills/css-maniac/`).
+Complete installation in the plugin details panel. For a local checkout, use its absolute path instead of the GitHub shorthand. See [Claude Code's marketplace guide](https://code.claude.com/docs/en/plugin-marketplaces).
 
-Then just work on styles; the skill triggers on its own. To call it directly: `/css-maniac:css-maniac` (plugin) or `/css-maniac` (copied folder). Add `review` for a review.
+**Manual install:** copy the entire [`skills/css-maniac/`](skills/css-maniac/) directory, including references and templates, to a supported skill directory: `$HOME/.agents/skills/css-maniac` for Codex, or `$HERMES_HOME/skills/css-maniac` for the active Hermes profile (`$HOME/.hermes/skills/css-maniac` for its default home). Check the destination first; do not overwrite an existing skill without reviewing it. See [Codex](https://developers.openai.com/codex/skills/) and [Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills/) documentation.
 
-## Contents
+## Examples
 
+These are **illustrative** before-and-after edits, not benchmarks or recorded agent output. Whether they fit depends on your markup and conventions.
+
+### Space a stack
+
+When `.stack` is a vertical flex container, its children have no other vertical margins, and equal spacing is intended, replace per-item margins and the last-child exception with `gap`:
+
+```css
+/* Before */
+.stack { display: flex; flex-direction: column; }
+.stack > * { margin-block-end: 1rem; }
+.stack > :last-child { margin-block-end: 0; }
+
+/* After */
+.stack { display: flex; flex-direction: column; gap: 1rem; }
 ```
-skills/css-maniac/
-├── SKILL.md                    the rules
-├── references/
-│   ├── palette.css             derived OKLCH palette, light-dark() themes
-│   ├── patterns.css            reset, root scale, Stack, Prose, Cluster, Pile, button, dialog
-│   └── _breakpoints.scss       @include size(md) { … }
-└── templates/
-    ├── ARCHITECTURE.md         the conventions section, with the defaults
-    └── stylelint.config.mjs    optional lint gate, offered, never installed unasked
+
+### Let a flex child shrink
+
+When a flex row overflows because its text child has an automatic minimum size, allow that child to shrink and let long words wrap instead of clipping the row:
+
+```css
+/* Before */
+.row { display: flex; overflow: hidden; }
+.row__text { flex: 1; }
+
+/* After */
+.row { display: flex; }
+.row__text { flex: 1; min-inline-size: 0; overflow-wrap: anywhere; }
 ```
 
-The palette is checked against thousands of random base colors in both themes: every text and fill pair, pressed state included, stays at or above 4.5:1.
+## First task
 
-## Credits
+Open a project with styles and ask your agent:
 
-The W3C TAG's *Rule of Least Power* (Berners-Lee & Mendelsohn); Kevin Powell's flow utility and layout teaching; the Stack and the "owl" selector from *Every Layout* (Heydon Pickering & Andy Bell); Lea Verou's work on OKLCH contrast; Material 3 tone and state-layer sizes; Robert C. Martin's ub-mode for the format.
+> Use CSS Maniac to investigate why the card row overflows on a narrow screen. Follow this project's conventions, make the smallest fix, and report the checks you ran and anything you could not verify.
 
-## License
+For a review, ask for a CSS review without edits. Selection and invocation vary by agent; naming the skill explicitly is a useful starting point, not a guarantee it was loaded. Check the agent's report.
+
+## What's inside
+
+- [`SKILL.md`](skills/css-maniac/SKILL.md) — conventions, diagnosis, layout, color, accessibility and review workflow.
+- [`references/`](skills/css-maniac/references/) — CSS patterns, palette and SCSS breakpoints.
+- [`templates/`](skills/css-maniac/templates/) — CSS conventions and an optional Stylelint configuration.
+
+Project conventions take precedence over the skill's defaults. The skill asks the agent to run the project's linter, check rendering and assess contrast; it does not install a linter or perform those checks by itself. Verify visual changes in the relevant widths, states and themes, and measure contrast with a suitable tool. If a check cannot be run, treat it as unverified.
+
+## Credits and license
+
+Inspired by [ub-mode](https://github.com/unclebob/ub-mode), the W3C TAG's Rule of Least Power, Kevin Powell's flow utility, Every Layout's Stack and owl selector, Lea Verou's work on OKLCH contrast, and Material 3 tones and state layers.
 
 [MIT](LICENSE)
