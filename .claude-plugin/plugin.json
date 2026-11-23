@@ -6,7 +6,7 @@
     "name": "coca-in-a-cola",
     "url": "https://github.com/coca-in-a-cola"
   },
-  "repository": "https://github.com/coca-in-a-cola/css-maniac-workspace",
+  "repository": "https://github.com/coca-in-a-cola/css-maniac",
   "license": "MIT",
   "keywords": ["css", "scss", "stylelint", "frontend", "design-system", "accessibility", "oklch", "code-review"]
 }
