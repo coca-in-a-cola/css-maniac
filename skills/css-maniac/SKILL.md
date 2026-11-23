@@ -8,11 +8,12 @@ description: Write, fix and review CSS/SCSS the way an experienced hand-coder wo
 Every time you write, fix or review styles:
 
 1. Load the Conventions.
-2. Diagnose before you change anything.
-3. Pick the Least Powerful Layer.
-4. Make it Work with the smallest edit.
-5. Make it Right: lint, pin, contrast.
-6. Report.
+2. Read the CSS Architecture: for a big change, the whole of it; for a small one, the file you touch.
+3. Diagnose before you change anything.
+4. Pick the Least Powerful Layer, with the flattest markup.
+5. Make it Work with the smallest edit.
+6. Make it Right: lint, pin, contrast.
+7. Report.
 
 The rules below are defaults. The project's conventions beat every one of them.
 
@@ -24,10 +25,10 @@ The rules below are defaults. The project's conventions beat every one of them.
 - Also read CSS rules stated in `CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md` and the linter config. A linter config is law for what it covers.
 
 ## The keys
-Stack (CSS / SCSS), framework, Baseline target, grid unit, units, mobile root scale, breakpoints and their unit, layout default (flex-first / grid-first), naming (BEM or not, `&__` concatenation or not), component API, palette and color format, themes, logical properties, nesting depth, z-index scale, motion, lint command.
+Stack (CSS / SCSS), framework, file structure (where styles live, how they split), Baseline target, grid unit, units, mobile root scale, breakpoints and their unit, layout default (flex-first / grid-first), naming (BEM or not, `&__` concatenation or not), component API, palette and color format, themes, logical properties, nesting depth, z-index scale, motion, lint command.
 
 ## When they are missing
-- **New project, new feature, new component, refactor:** stop before writing. Ask only for the missing keys, offering the defaults as the recommended answer. Write the answers to `ARCHITECTURE.md` at the root of the styles' subtree, then go.
+- **New project, new feature, new component, refactor, any big change:** stop before writing. Ask only for the missing keys, offering the defaults as the recommended answer. Write the answers to `ARCHITECTURE.md` at the root of the styles' subtree, then go.
 - **A fix** (a bug, one component, a quick change): don't block. Infer the keys from the file you are editing, and only that file. Make the fix in that file's style. In the report, list what you inferred and advise the user to state their conventions; offer to write them.
 - **Nobody to ask:** infer from the file, else use the defaults. Say which in the report. Don't write `ARCHITECTURE.md` unasked.
 
@@ -36,6 +37,7 @@ Stack (CSS / SCSS), framework, Baseline target, grid unit, units, mobile root sc
 - Units: the unit most declarations use. Mixed → follow the nearest neighboring rule.
 - Naming: 50% or more of the classes are BEM → BEM. Look for `&__` to see if concatenation is used.
 - Layout: count `display: flex` against `display: grid`.
+- File structure: look at where the file sits and what imports it.
 - Breakpoints: the `@media` values and their direction (`min-width` → mobile-first).
 - Themes: `light-dark()`, `prefers-color-scheme` or a theme class present → themed.
 - Anything the file doesn't show → default.
@@ -44,6 +46,29 @@ Stack (CSS / SCSS), framework, Baseline target, grid unit, units, mobile root sc
 - Code that breaks its own conventions: report it, don't migrate it unasked.
 - A request that breaks a convention: say so once, then do what was asked.
 - Conventions change only when the user says so.
+
+# Architecture
+
+## Big change first, small change second
+- A big change (a feature, several components, a page, a refactor): before writing, read the CSS architecture itself: the entry file, `@layer` order, tokens and palette, existing primitives, components, mixins and utilities. Extend that local framework consistently; then make the specific change inside it.
+- A small change: consistency with the file and its neighbors first.
+- Never start a second system next to the first: no new token set, no new spacing scale, no new button when one exists.
+
+## Split the files
+- Never put all styles in one file when you can split. One file per component, next to it or in `components/`. Separate files for palette and tokens, reset and base, layout primitives, utilities.
+- One entry file decides the order, ideally with `@layer` (`reset, base, layout, components, utilities`). SCSS: partials through `@use` / `@forward`. Framework: its per-component styles. Plain CSS: the project's bundler, or a few `<link>`s in cascade order.
+- The project already has a structure → follow it. A new file goes where its siblings live.
+
+## Order inside a file
+- Rules follow the markup: the block first, then its elements in the order they appear in the HTML, outer before inner.
+- States, modifiers and `@media` / `@container` for a rule sit with that rule (nested or right after it), not in a block at the end of the file.
+- A new rule goes where its element sits in the HTML, not at the bottom.
+- Reordering existing rules can change equal-specificity results: reorder only in a refactor, and pin it.
+
+## Orphans
+- A selector that matches nothing in the markup is an orphan. Before calling it one, search templates, components, JS that adds classes, dynamic class names (`'btn--' + size`), CMS and markdown content.
+- Never delete orphans silently. List them with file:line and ask the user to approve the deletion.
+- Dead declarations inside a rule you are already editing are different: remove them (see Smallest Edit).
 
 # Diagnose
 
@@ -59,8 +84,16 @@ Stack (CSS / SCSS), framework, Baseline target, grid unit, units, mobile root sc
 - Native controls carry their state to assistive tech for free. Pick the one whose meaning fits: `<details>` to show and hide, `popover` for menus, radios for one-of filters, a checkbox for on/off, `<dialog>` for modals.
 - Style state from what HTML already holds: `:checked`, `[open]`, `:popover-open`, `:user-invalid`, `[aria-expanded]`, `[aria-current]`, `[data-state]`. Not from JS variables or extra classes.
 - `:has()`, `:focus-within`, `:target` before a JS listener.
-- SCSS only for what CSS can't do: breakpoint values inside `@media`, `@include` mixins. Native nesting, custom properties, `calc()`, `color-mix()` for the rest.
+- SCSS for what CSS can't do: breakpoint values inside `@media`, mixins that reuse a declaration group. Native nesting, custom properties, `calc()`, `color-mix()` for the rest.
 - JS only for what the lower layers can't express. Canvas only for 3D or non-document graphics.
+
+## Flat markup
+- Always the fewest elements. Text inside a div inside a div inside a div is the anti-pattern; AI and inexperienced devs add wrappers by reflex.
+- Every element earns its place: it has a meaning (`<nav>`, `<li>`, `<button>`), creates a layout context the content needs, or is a hook JS or the framework truly requires.
+- Style the element that exists. A `<ul>` can be the flex container; a `<button>` can hold the icon and the label; `::before` / `::after` instead of a decorative span. Use the semantic element, not a `div` inside it.
+- In the markup you are editing, remove wrappers that do nothing. Every one removed is a selector and a nesting level gone.
+- A wrapper you can't remove (the framework's host element, an Angular component tag, a JS mount point, a slot) that does nothing for styles gets `display: contents`, so its children join the parent's layout. Use it widely on such elements: `:host { display: contents; }`.
+- Never `display: contents` on a button, link, form control, anything focusable, a table part, a list item, a heading or a landmark: they lose their box and can drop out of the accessibility tree. A `display: contents` element takes no box styles: no padding, border, background.
 
 ## Animation
 - Movement: `transform`, `opacity`, `filter`. They run on the compositor.
@@ -94,7 +127,8 @@ Stack (CSS / SCSS), framework, Baseline target, grid unit, units, mobile root sc
 - `box-sizing` per element, vendor prefixes, `position: relative` nobody needs, `z-index` with no stacking need, duplicate declarations.
 - `overflow: hidden` or `overflow-x: hidden` on `body` or a wrapper to hide an overflow → find the overflowing child.
 - Magic numbers: `calc(100dvh - 64px)`, `top: 73px`, `margin-top: -3px` → a layout that needs no number (flex column with `flex: 1`, `position: sticky`, `gap`).
-- Wrapper `div`s added only to style → style the element that exists.
+- Wrapper `div`s added only to style → style the element that exists (see Flat markup).
+- One giant stylesheet → split it (see Architecture).
 - `z-index: 999` and up → `isolation: isolate`, DOM order, the stacking rules below.
 - `margin-bottom` on every item + `:last-child { margin-bottom: 0 }` → `gap` or the Stack.
 - A `1fr` track that grows with its content → `minmax(0, 1fr)`.
@@ -204,7 +238,9 @@ Stack (CSS / SCSS), framework, Baseline target, grid unit, units, mobile root sc
 # SCSS
 
 - `@use` and `@forward`, never `@import`: it is deprecated and leaks globals.
-- Never `@extend`. Mixins only for what CSS can't do.
+- Never `@extend`.
+- Reuse with mixins: the same group of declarations used twice or more becomes a parameterized mixin in a partial (`@include focus-ring;`, `@include truncate(2);`). Plus mixins for what CSS can't do (breakpoints). A mixin must save lines; a one-use mixin is noise.
+- A repeated group that is really a component or a layout pattern is a class (component or primitive), not a mixin. In plain CSS, reuse through primitives, shared classes and custom properties.
 - CSS over Sass: `color-mix()`, not `darken()` / `lighten()`; `calc()` for mixed units; custom properties, not `$vars`, for anything a theme or script changes.
 - Class names per conventions; by default full names, no `&__el` / `&--mod` concatenation: full names stay greppable.
 - A legacy codebase on `@import` or global functions: follow it, report it, migrate only when asked.
@@ -228,12 +264,13 @@ Stack (CSS / SCSS), framework, Baseline target, grid unit, units, mobile root sc
 
 When asked to review, or on `/css-maniac review`:
 1. Load the conventions. A review writes no code until asked.
-2. Read every stylesheet in scope and the markup it styles. Run the linter if there is one.
+2. Read the architecture, every stylesheet in scope and the markup it styles. Run the linter if there is one.
 3. Sort findings by severity:
    - **Broken**: visible bug, overflow, contrast fail, lost focus, layout that breaks with real content.
    - **Fragile**: magic numbers, `!important`, specificity fights, layouts that depend on content length.
    - **Convention**: breaks the project's conventions.
-   - **Noise**: dead code, restated defaults, AI noise.
+   - **Noise**: dead code, restated defaults, AI noise, wrappers that do nothing, rules out of markup order.
+   - **Orphans**: selectors that match no markup. Listed for approval, never deleted in the review.
 4. Answer in this form:
 
 ```
@@ -245,8 +282,9 @@ Conventions: <ARCHITECTURE.md path | inferred from <file> | defaults>
 ### Fragile
 ### Convention
 ### Noise
+### Orphans (delete?)
 
-N broken · N fragile · N convention · N noise. Fix which?
+N broken · N fragile · N convention · N noise · N orphans. Fix which?
 ```
 
 # Report
@@ -254,3 +292,5 @@ N broken · N fragile · N convention · N noise. Fix which?
 - Conventions used: the file, or what you inferred, with an offer to save them.
 - Each change, why, how it was proved (lint, pin, contrast).
 - Bad styles you saw but didn't touch, with file:line, and an offer to fix them.
+- Orphans you found, with file:line, asking whether to delete them.
+- Wrappers you removed or set to `display: contents`.

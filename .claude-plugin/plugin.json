@@ -1,6 +1,6 @@
 {
   "name": "css-maniac",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Makes AI write, fix and review CSS/SCSS like an experienced hand-coder: project conventions first, then least power, Baseline CSS, smallest edit, derived OKLCH color, lint and contrast checks.",
   "author": {
     "name": "coca-in-a-cola",

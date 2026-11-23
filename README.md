@@ -7,10 +7,12 @@ AI-written CSS works on the screenshot and rots in the codebase: `!important` to
 ## What it does
 
 - **Conventions first.** Reads the project's `## CSS conventions` from `ARCHITECTURE.md` (nested files per subtree; the nearest wins). Missing? For new work it asks you, offering sensible defaults, and writes them down. For a quick fix it infers them from the file it edits, then suggests you state them.
+- **Architecture before the change.** A big change starts by reading the project's CSS architecture and extending it; styles split into files per component, rules in markup order.
+- **Flat markup.** Fewest elements; `display: contents` on wrappers a framework forces but styles don't need.
 - **Diagnose before fixing.** Finds the rule that actually wins and fixes it there. No appended overrides, no `!important`.
 - **Rule of least power.** HTML → CSS → SCSS → JS. Native controls and their state before JS and extra classes.
 - **Baseline.** Widely available by default; newer features only when they degrade harmlessly or sit in `@supports` with a fallback.
-- **Smallest edit, least code.** Removes AI noise: restated defaults, magic numbers, wrapper divs, zombie rules.
+- **Smallest edit, least code.** Removes AI noise: restated defaults, magic numbers, wrapper divs, zombie rules. Unused selectors are listed and deleted only with your approval.
 - **Layout.** Flex-first by default, intrinsic before `@container` before `@media`, primitives (Stack, Prose, Cluster, Pile), one grid unit, rem-scaled UI.
 - **Color by math.** A few base colors; everything else derived in OKLCH with `light-dark()` themes, guaranteed text contrast and state layers that never lose it.
 - **Checks before done.** The project's linter, a visual pin of every breakpoint and theme, WCAG contrast. A structured review mode.

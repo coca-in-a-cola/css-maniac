@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.0 — 2026-11-23
+
+### Added
+- Architecture step: for a big change, read the CSS architecture and extend the local framework first; for a small change, match the file and its neighbors. Never start a second system.
+- Flat markup: fewest elements, no wrappers by reflex; `display: contents` on wrappers the framework or JS forces but styles don't need, never on focusable, semantic or table/list elements.
+- Split files: one file per component, separate palette, base, layout and utilities, one entry file ordering them with `@layer`.
+- Rules inside a file follow the markup order; states and queries sit with their rule.
+- Orphan selectors are searched for carefully, listed and deleted only after the user approves.
+- SCSS: declaration groups used twice or more become mixins.
+- New convention keys: files, markup. Review and report list orphans and removed wrappers.
+
 ## 1.0.0 — 2026-11-22
 
 ### Added
