@@ -5,9 +5,9 @@
 Помогите агенту писать, исправлять и проверять CSS и SCSS с учётом правил проекта и без лишних изменений.
 
 <p align="center">
-  <a href="CHANGELOG.md#110--2026-11-23"><img src="https://img.shields.io/badge/version-v1.1.0-blue" alt="version: v1.1.0"></a>
-  <a href="https://agentskills.io/"><img src="https://img.shields.io/badge/Agent%20Skills-Open%20standard-blue" alt="Agent Skills: Open standard"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License: MIT"></a>
+  <a href="CHANGELOG.md#110--2026-11-23"><img src="https://img.shields.io/badge/version-v1.1.0-blue?style=for-the-badge" alt="version: v1.1.0"></a>
+  <a href="https://agentskills.io/"><img src="https://img.shields.io/badge/Agent%20Skills-Open%20standard-blue?style=for-the-badge" alt="Agent Skills: Open standard"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License: MIT"></a>
 </p>
 
 <p align="center"><a href="ARCHITECTURE.md">ARCHITECTURE</a> · <a href="CHANGELOG.md">CHANGELOG</a> · AGENTS</p>
