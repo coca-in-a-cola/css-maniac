@@ -2,9 +2,15 @@
 
 English · [Русский](README.ru.md)
 
-Give your coding agent a practical CSS workflow: learn the project's conventions, find the cause of a styling problem, and make the smallest fitting change. CSS Maniac is a reusable skill for writing, fixing and reviewing CSS and SCSS—not a linter or a guarantee of correct output.
+Help your coding agent write, fix and review CSS and SCSS with your project's conventions and the smallest fitting change.
 
-**[Install](#install) · [Examples](#examples) · [First task](#first-task) · [What's inside](#whats-inside)**
+<p align="center">
+  <a href="CHANGELOG.md#110--2026-11-23"><img src="https://img.shields.io/badge/version-v1.1.0-blue" alt="version: v1.1.0"></a>
+  <a href="https://agentskills.io/"><img src="https://img.shields.io/badge/Agent%20Skills-Open%20standard-blue" alt="Agent Skills: Open standard"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License: MIT"></a>
+</p>
+
+<p align="center"><a href="ARCHITECTURE.md">ARCHITECTURE</a> · <a href="CHANGELOG.md">CHANGELOG</a> · AGENTS</p>
 
 ## Install
 
@@ -26,46 +32,6 @@ Select your agent and installation scope when prompted. This repository must be 
 Complete installation in the plugin details panel. For a local checkout, use its absolute path instead of the GitHub shorthand. See [Claude Code's marketplace guide](https://code.claude.com/docs/en/plugin-marketplaces).
 
 **Manual install:** copy the entire [`skills/css-maniac/`](skills/css-maniac/) directory, including references and templates, to a supported skill directory: `$HOME/.agents/skills/css-maniac` for Codex, or `$HERMES_HOME/skills/css-maniac` for the active Hermes profile (`$HOME/.hermes/skills/css-maniac` for its default home). Check the destination first; do not overwrite an existing skill without reviewing it. See [Codex](https://developers.openai.com/codex/skills/) and [Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills/) documentation.
-
-## Examples
-
-These are **illustrative** before-and-after edits, not benchmarks or recorded agent output. Whether they fit depends on your markup and conventions.
-
-### Space a stack
-
-When `.stack` is a vertical flex container, its children have no other vertical margins, and equal spacing is intended, replace per-item margins and the last-child exception with `gap`:
-
-```css
-/* Before */
-.stack { display: flex; flex-direction: column; }
-.stack > * { margin-block-end: 1rem; }
-.stack > :last-child { margin-block-end: 0; }
-
-/* After */
-.stack { display: flex; flex-direction: column; gap: 1rem; }
-```
-
-### Let a flex child shrink
-
-When a flex row overflows because its text child has an automatic minimum size, allow that child to shrink and let long words wrap instead of clipping the row:
-
-```css
-/* Before */
-.row { display: flex; overflow: hidden; }
-.row__text { flex: 1; }
-
-/* After */
-.row { display: flex; }
-.row__text { flex: 1; min-inline-size: 0; overflow-wrap: anywhere; }
-```
-
-## First task
-
-Open a project with styles and ask your agent:
-
-> Use CSS Maniac to investigate why the card row overflows on a narrow screen. Follow this project's conventions, make the smallest fix, and report the checks you ran and anything you could not verify.
-
-For a review, ask for a CSS review without edits. Selection and invocation vary by agent; naming the skill explicitly is a useful starting point, not a guarantee it was loaded. Check the agent's report.
 
 ## What's inside
 

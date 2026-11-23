@@ -1,5 +1,7 @@
 # Changelog
 
+[English README](README.md) · [Русский README](README.ru.md) · [Architecture](ARCHITECTURE.md)
+
 ## 1.1.0 — 2026-11-23
 
 ### Added

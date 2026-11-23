@@ -2,9 +2,15 @@
 
 [English](README.md) · Русский
 
-Помогите агенту работать с CSS осмысленно: сначала разобраться в правилах проекта и причине проблемы, затем внести минимальное подходящее изменение. CSS Maniac — переиспользуемый навык для написания, исправления и ревью CSS и SCSS. Он не заменяет линтер и не гарантирует правильный результат.
+Помогите агенту писать, исправлять и проверять CSS и SCSS с учётом правил проекта и без лишних изменений.
 
-**[Установка](#установка) · [Примеры](#примеры) · [Первая задача](#первая-задача) · [Состав](#состав)**
+<p align="center">
+  <a href="CHANGELOG.md#110--2026-11-23"><img src="https://img.shields.io/badge/version-v1.1.0-blue" alt="version: v1.1.0"></a>
+  <a href="https://agentskills.io/"><img src="https://img.shields.io/badge/Agent%20Skills-Open%20standard-blue" alt="Agent Skills: Open standard"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License: MIT"></a>
+</p>
+
+<p align="center"><a href="ARCHITECTURE.md">ARCHITECTURE</a> · <a href="CHANGELOG.md">CHANGELOG</a> · AGENTS</p>
 
 ## Установка
 
@@ -26,46 +32,6 @@ npx skills add coca-in-a-cola/css-maniac --skill css-maniac
 Завершите установку в карточке плагина. Для локальной копии укажите её абсолютный путь вместо адреса GitHub. Подробнее — в [документации Claude Code](https://code.claude.com/docs/en/plugin-marketplaces).
 
 **Вручную:** скопируйте всю папку [`skills/css-maniac/`](skills/css-maniac/) вместе с материалами и шаблонами в папку навыков: `$HOME/.agents/skills/css-maniac` для Codex или `$HERMES_HOME/skills/css-maniac` для активного профиля Hermes (`$HOME/.hermes/skills/css-maniac` для профиля по умолчанию). Сначала проверьте папку назначения; не перезаписывайте существующий навык без проверки. Документация: [Codex](https://developers.openai.com/codex/skills/), [Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills/).
-
-## Примеры
-
-Это **условные** примеры изменений, а не результаты тестов или записи работы агента. Их применимость зависит от разметки и правил проекта.
-
-### Отступы в вертикальном списке
-
-Если `.stack` — вертикальный flex-контейнер, у его детей нет других вертикальных отступов и нужны одинаковые интервалы, можно заменить отступы элементов и исключение для последнего на `gap`:
-
-```css
-/* Before */
-.stack { display: flex; flex-direction: column; }
-.stack > * { margin-block-end: 1rem; }
-.stack > :last-child { margin-block-end: 0; }
-
-/* After */
-.stack { display: flex; flex-direction: column; gap: 1rem; }
-```
-
-### Сжатие flex-элемента
-
-Если flex-строка переполняется из-за автоматального минимального размера текстового элемента, разрешите ему сжиматься и переносить длинные слова вместо обрезки строки:
-
-```css
-/* Before */
-.row { display: flex; overflow: hidden; }
-.row__text { flex: 1; }
-
-/* After */
-.row { display: flex; }
-.row__text { flex: 1; min-inline-size: 0; overflow-wrap: anywhere; }
-```
-
-## Первая задача
-
-Откройте проект со стилями и попросите агента:
-
-> Используй CSS Maniac и выясни, почему ряд карточек выходит за границы на узком экране. Следуй правилам проекта, внеси минимальное исправление и расскажи, что проверил и что проверить не удалось.
-
-Для ревью попросите проверить CSS без правок. Способ вызова и выбор навыка зависят от агента: явное название в запросе помогает, но не гарантирует загрузку навыка. Проверьте отчёт агента.
 
 ## Состав
 
