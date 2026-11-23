@@ -1,4 +1,4 @@
-# CSS Maniac
+<h1 align="center"><img src="docs/assets/own_css-maniac-lockup.png" alt="CSS Maniac" width="500"></h1>
 
 English · [Русский](README.ru.md)
 
