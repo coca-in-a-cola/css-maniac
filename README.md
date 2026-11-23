@@ -1,4 +1,4 @@
-<h1 align="center"><img src="docs/assets/own_css-maniac-original.png" alt="CSS Maniac" height="160"></h1>
+<h1 align="center"><img src="docs/assets/own_css-maniac-original.png" alt="CSS Maniac" height="360"></h1>
 
 English · [Русский](README.ru.md)
 
