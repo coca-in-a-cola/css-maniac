@@ -221,6 +221,10 @@ Stack (CSS / SCSS), framework, file structure (where styles live, how they split
 
 # Specificity and Stacking
 
+- Class-first selectors: use an existing class as the hook. If two hooks always travel together, use the existing class alone, not a redundant compound or a new class. For HTML state use the class with its native attribute or pseudo-class: `.disclosure[open]`, `.option:checked`, not a JS-maintained state class.
+- Default to zero type selectors. Use at most one per complete selector branch, only when genuinely necessary, such as a semantic document base or markup you cannot attach classes to. Count each path through comma groups and functional pseudos, including tags inside `:is()`, `:not()` and `:where()`, after resolving CSS/SCSS nesting. Neither nesting nor zero specificity makes a tag chain acceptable.
+- Good: `.card__title`, `.disclosure[open]`, `.prose > * + *`. Bad: `.card article h2`, `.card :where(article h2)`, `.card { article { h2 { … } } }`. A scoped direct-child universal (`.row > *`) is for layout the parent owns uniformly, as in the Prose flow; never use a broad descendant wildcard (`.card *`) as a component hook.
+- Define global tag styles in the base/reset layer, not repeatedly in components. For a global adjustment edit the owning rule; for a local change target the component class, not a tag override. The reset and document-base examples in `references/patterns.css` remain global.
 - No IDs in selectors. No `!important` except utilities that must always win.
 - Nesting ≤ 3 levels. `:where()` for zero-specificity defaults. `@layer` to order sources instead of selector weight.
 - `z-index`: `-1`, `0`, `1` or a token. Contain stacking with `isolation: isolate` instead of escalating numbers.
@@ -268,7 +272,7 @@ When asked to review, or on `/css-maniac review`:
 3. Sort findings by severity:
    - **Broken**: visible bug, overflow, contrast fail, lost focus, layout that breaks with real content.
    - **Fragile**: magic numbers, `!important`, specificity fights, layouts that depend on content length.
-   - **Convention**: breaks the project's conventions.
+   - **Convention**: breaks the project's conventions or the applicable class-first selector policy. Check resolved selector paths and intent, not just a lint count.
    - **Noise**: dead code, restated defaults, AI noise, wrappers that do nothing, rules out of markup order.
    - **Orphans**: selectors that match no markup. Listed for approval, never deleted in the review.
 4. Answer in this form:
